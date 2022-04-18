@@ -532,6 +532,9 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         );
     });
     it('FixPrice List: Test ApproveOrder, AtomocSwap and CancelOrder on ERC721 with ERC20 Token', async () => {
+        const exchangeGovernor = accounts[0];
+        const tempExchangeGovernor = accounts[10];
+
         const player0 = accounts[1];
         const player1 = accounts[2];
         const player0RelayerFeeRecipient = accounts[3];
@@ -644,6 +647,30 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             "0000000000000000000000000000000000000000000000000000000000000000" +
             "0000000000000000000000000000000000000000000000000000000000000000"
         ));
+
+        await niftyConnectExchangeInst.setPendingGovernor(tempExchangeGovernor, {from: exchangeGovernor});
+        await niftyConnectExchangeInst.acceptGovernance({from: tempExchangeGovernor});
+
+        await niftyConnectExchangeInst.changeExchangeFeeRate(web3.utils.toBN(150), {from: tempExchangeGovernor});
+
+        try {
+            await niftyConnectExchangeInst.changeTakerRelayerFeeShare(
+                web3.utils.toBN(7500),
+                web3.utils.toBN(1200),
+                web3.utils.toBN(800),
+                {from: tempExchangeGovernor});
+            assert.fail();
+        } catch (error) {
+            assert.ok(error.toString().includes("invalid new fee share"));
+        }
+        await niftyConnectExchangeInst.changeTakerRelayerFeeShare(
+            web3.utils.toBN(7500),
+            web3.utils.toBN(1500),
+            web3.utils.toBN(1000),
+            {from: tempExchangeGovernor});
+
+        await niftyConnectExchangeInst.setPendingGovernor(exchangeGovernor, {from: tempExchangeGovernor});
+        await niftyConnectExchangeInst.acceptGovernance({from: exchangeGovernor});
 
         const INVERSE_BASIS_POINT = await niftyConnectExchangeInst.INVERSE_BASIS_POINT();
 

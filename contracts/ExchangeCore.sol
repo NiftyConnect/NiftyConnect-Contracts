@@ -9,10 +9,11 @@ import "./IERC2981.sol";
 import "./IRoyaltyRegisterHub.sol";
 import "./ReentrancyGuarded.sol";
 import "./Ownable.sol";
+import "./Governable.sol";
 import "./SaleKindInterface.sol";
 import "./AuthenticatedProxy.sol";
 
-contract ExchangeCore is ReentrancyGuarded, Ownable {
+contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     string public constant name = "NiftyConnect Exchange Contract";
     string public constant version = "1.0";
 
@@ -195,7 +196,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable {
      */
     function changeExchangeFeeRate(uint newExchangeFeeRate)
     public
-    onlyOwner
+    onlyGovernor
     {
         exchangeFeeRate = newExchangeFeeRate;
     }
@@ -208,7 +209,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable {
      */
     function changeTakerRelayerFeeShare(uint newTakerRelayerFeeShare, uint newMakerRelayerFeeShare, uint newProtocolFeeShare)
     public
-    onlyOwner
+    onlyGovernor
     {
         require(SafeMath.add(SafeMath.add(newTakerRelayerFeeShare, newMakerRelayerFeeShare), newProtocolFeeShare) == INVERSE_BASIS_POINT, "invalid new fee share");
         takerRelayerFeeShare = newTakerRelayerFeeShare;
