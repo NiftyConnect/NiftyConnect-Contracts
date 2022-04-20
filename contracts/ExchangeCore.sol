@@ -59,12 +59,12 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     uint public exchangeFeeRate = 200;
 
     /* Share of exchangeFee which will be paid to takerRelayerFeeRecipient, in basis points. */
-    /* Initial share 70% */
-    uint public takerRelayerFeeShare = 8000;
+    /* Initial share 15% */
+    uint public takerRelayerFeeShare = 1500;
 
     /* Share of exchangeFee which will be paid to makerRelayerFeeRecipient, in basis points. */
-    /* Initial share 15% */
-    uint public makerRelayerFeeShare = 1500;
+    /* Initial share 80% */
+    uint public makerRelayerFeeShare = 8000;
 
     /* Share of exchangeFee which will be paid to protocolFeeRecipient, in basis points. */
     /* Initial share 5% */

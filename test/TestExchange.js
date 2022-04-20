@@ -109,10 +109,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         assert.equal(exchangeFeeRate.toString(), "200", "wrong exchangeFeeRate");
 
         const takerRelayerFeeShare = await niftyConnectExchangeInst.takerRelayerFeeShare();
-        assert.equal(takerRelayerFeeShare.toString(), "8000", "wrong takerRelayerFeeShare");
+        assert.equal(takerRelayerFeeShare.toString(), "1500", "wrong takerRelayerFeeShare");
 
         const makerRelayerFeeShare = await niftyConnectExchangeInst.makerRelayerFeeShare();
-        assert.equal(makerRelayerFeeShare.toString(), "1500", "wrong makerRelayerFeeShare");
+        assert.equal(makerRelayerFeeShare.toString(), "8000", "wrong makerRelayerFeeShare");
 
         const protocolFeeShare = await niftyConnectExchangeInst.protocolFeeShare();
         assert.equal(protocolFeeShare.toString(), "500", "wrong protocolFeeShare");
