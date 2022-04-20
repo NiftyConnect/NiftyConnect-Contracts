@@ -66,8 +66,18 @@ contract Exchange is ExchangeCore {
         }
         require(uints[8]>=2&&merkleRoot!=bytes32(0x00), "invalid merkle data");
         uint256 merkleProofLength;
-        for(uint256 divResult = SafeMath.add(uints[8],1)/2;divResult!=0;divResult=divResult/2) {
+        uint256 divResult = uints[8];
+        bool hasMod = false;
+        for(;divResult!=0;) {
+            uint256 tempDivResult = divResult/2;
+            if (SafeMath.mul(tempDivResult, 2)<divResult) {
+                hasMod = true;
+            }
+            divResult=tempDivResult;
             merkleProofLength++;
+        }
+        if (!hasMod) {
+            merkleProofLength--;
         }
         merkleProof = new bytes32[](merkleProofLength);
         require(merkleRoot!=bytes32(0x00), "invalid merkleRoot");

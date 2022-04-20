@@ -51,9 +51,18 @@ function generateMerkleProofAndRoot(targetTokenId, tokenIds) {
         return a - b
     });
     let merkleProofLength = 0;
-    let divResult = Math.floor(tokenIds.length/2)
-    for(;divResult!==0;divResult=Math.floor(divResult/2)) {
+    let divResult = tokenIds.length;
+    let hasMod = false;
+    for(;divResult!==0;) {
+        let tempDivResult = Math.floor(divResult/2);
+        if (tempDivResult*2<divResult) {
+            hasMod = true;
+        }
+        divResult=tempDivResult;
         merkleProofLength++;
+    }
+    if (!hasMod) {
+        merkleProofLength--;
     }
     let merkleProof = new Array(merkleProofLength);
     for(let idx=0; idx<merkleProofLength;idx++) {
@@ -96,6 +105,8 @@ function generateMerkleProofAndRoot(targetTokenId, tokenIds) {
         tempProofLength = Math.floor((tempProofLength+1)/2)
         tempProof = new Array(tempProofLength);
     }
+    console.log("merkleRoot: "+merkleRoot);
+    console.log("merkleProof: "+merkleProof);
     return {merkleRoot, merkleProof};
 }
 
