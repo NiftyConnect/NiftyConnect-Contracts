@@ -1,5 +1,6 @@
 const Web3 = require('web3');
 const crypto = require('crypto');
+const keccak256 = require('keccak256');
 const truffleAssert = require('truffle-assertions');
 const { expectRevert, time } = require('@openzeppelin/test-helpers');
 const sleep = require("await-sleep");
@@ -23,10 +24,79 @@ const ERC1155SafeTransferSelector = web3.utils.toBN(2);
 
 function stringToBytes32(symbol) {
     let result = symbol;
-    for (var i = 0; i < 64 - symbol.length; i++) {
+    for (let i = 0; i < 64 - symbol.length; i++) {
         result = "0" + result;
     }
     return '0x'+result;
+}
+
+function calculateProof(leafA, leafB) {
+    if ( typeof leafB === 'undefined' ) {
+        leafB = leafA
+    }
+    const leafABuffer = Buffer.from(web3.utils.hexToBytes(leafA));
+    const leafBBuffer = Buffer.from(web3.utils.hexToBytes(leafB));
+    let hash;
+    if (leafA>leafB) {
+        hash = "0x"+keccak256(Buffer.concat([leafBBuffer, leafABuffer])).toString('hex');
+    } else {
+        hash = "0x"+keccak256(Buffer.concat([leafABuffer, leafBBuffer])).toString('hex');
+    }
+    return hash;
+}
+
+function generateMerkleProofAndRoot(targetTokenId, tokenIds) {
+    assert.isTrue(Array.isArray(tokenIds), "expect array");
+    tokenIds.sort((a, b) => {
+        return a - b
+    });
+    let merkleProofLength = 0;
+    let divResult = Math.floor(tokenIds.length/2)
+    for(;divResult!==0;divResult=Math.floor(divResult/2)) {
+        merkleProofLength++;
+    }
+    let merkleProof = new Array(merkleProofLength);
+    for(let idx=0; idx<merkleProofLength;idx++) {
+        merkleProof[idx] = "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+
+    let merkleProofInputs = new Array(tokenIds.length);
+    for(let idx=0; idx<tokenIds.length;idx++) {
+        merkleProofInputs[idx] = stringToBytes32(tokenIds[idx].toString(16))
+    }
+    let tempProofLength = Math.floor((tokenIds.length+1)/2)
+    let tempProof = new Array(tempProofLength);
+    let merkleRoot;
+    let leaf = stringToBytes32(targetTokenId.toString(16));
+    let proofIdx = 0;
+    for(;tempProof.length>=1;) {
+        for(let idx=0;idx<tempProof.length;idx++){
+            let matched = false;
+            if (leaf === merkleProofInputs[2*idx]) {
+                merkleProof[proofIdx] = merkleProofInputs[2*idx+1];
+                proofIdx++;
+                matched = true;
+            } else if (leaf === merkleProofInputs[2*idx+1]) {
+                merkleProof[proofIdx] = merkleProofInputs[2*idx];
+                proofIdx++;
+                matched = true;
+            }
+            tempProof[idx] = calculateProof(merkleProofInputs[2*idx], merkleProofInputs[2*idx+1]);
+            if (matched) {
+                leaf = tempProof[idx];
+            }
+        }
+        merkleProofInputs = tempProof;
+
+        if (tempProof.length===1) {
+            merkleRoot = tempProof[0];
+            break;
+        }
+
+        tempProofLength = Math.floor((tempProofLength+1)/2)
+        tempProof = new Array(tempProofLength);
+    }
+    return {merkleRoot, merkleProof};
 }
 
 contract('NiftyConnect Exchange Contract v2', (accounts) => {
@@ -2263,13 +2333,28 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await testERC721Inst.mint(player0, {from: player0});
         const tokenIdIdx4 = await testERC721Inst.tokenIdIdx();
         await testERC721Inst.mint(player0, {from: player0});
+        const tokenIdIdx5 = await testERC721Inst.tokenIdIdx();
+        await testERC721Inst.mint(player0, {from: player0});
+        const tokenIdIdx6 = await testERC721Inst.tokenIdIdx();
+        await testERC721Inst.mint(player0, {from: player0});
+        const tokenIdIdx7 = await testERC721Inst.tokenIdIdx();
+        await testERC721Inst.mint(player0, {from: player0});
 
         const proof1 = await merkleValidatorInst.calculateProof(tokenIdIdx1, tokenIdIdx2);
         const proof2 = await merkleValidatorInst.calculateProof(tokenIdIdx3, tokenIdIdx4);
         const proof3 = await merkleValidatorInst.calculateProof(proof1, proof2);
 
-        const merkleRoot = proof3;
-        const merkleProof = [stringToBytes32(tokenIdIdx2.toString("hex")), proof2.toString()];
+        const {merkleRoot, merkleProof} = generateMerkleProofAndRoot(tokenIdIdx1,
+            [
+                tokenIdIdx1,
+                tokenIdIdx2,
+                tokenIdIdx3,
+                tokenIdIdx4,
+                tokenIdIdx5,
+                tokenIdIdx6,
+                tokenIdIdx7,
+            ]
+        )
 
         const emptyTokenId = web3.utils.toBN(0);
 
@@ -2283,10 +2368,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             merkleRoot, // bytes32 merkleRoot
             [
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
             ],          // merkleProof
         );
-
         let buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
             "0x" +
             "00000000" +                                                          // selector
@@ -2298,6 +2383,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             "0000000000000000000000000000000000000000000000000000000000000000" +
             "0000000000000000000000000000000000000000000000000000000000000000" +
             "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
             "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         ));
 
@@ -2306,7 +2392,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let expireTime = web3.utils.toBN(timestamp).add(web3.utils.toBN(3600)); // expire at one hour later
         let exchangePrice = web3.utils.toBN(1e18);
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.approveOrder_(
+        const approveOrderTx = await niftyConnectExchangeInst.approveOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player1,                                            // maker
@@ -2328,7 +2414,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 ERC721TransferSelector,       // uint merkleValidatorSelector
                 emptyTokenId,                 // uint tokenId
                 ERC721_AMOUNT,                // uint amount
-                4,                            // uint totalLeaf
+                7,                            // uint totalLeaf
             ],
             0,                      // side
             0,                      // saleKind
@@ -2341,6 +2427,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             ],                      // merkleData
             {from: player1}
         );
+
+        truffleAssert.eventEmitted(approveOrderTx, "OrderApprovedPartTwo",(ev) => {
+            return ev.calldata.toString() === buyCalldata.toString();
+        });
 
         // ---------------------------------------------------------------------------------------------------------
 
@@ -2361,6 +2451,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
             "0x" +
             "00000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
             "0000000000000000000000000000000000000000000000000000000000000000" +
             "0000000000000000000000000000000000000000000000000000000000000000" +
             "0000000000000000000000000000000000000000000000000000000000000000" +
@@ -2451,7 +2542,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 ERC721TransferSelector,       // uint merkleValidatorSelector
                 emptyTokenId,                 // uint tokenId
                 ERC721_AMOUNT,                // uint amount
-                4,                            // uint totalLeaf
+                7,                            // uint totalLeaf
             ],
             0,                      // side
             0,                      // saleKind
@@ -2468,7 +2559,18 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await sleep(2 * 1000);
         await time.advanceBlock();
 
-        const merkleProofNew = [stringToBytes32(tokenIdIdx1.toString("hex")), proof2.toString()];
+        const merkleResult = generateMerkleProofAndRoot(tokenIdIdx2,
+            [
+                tokenIdIdx1,
+                tokenIdIdx2,
+                tokenIdIdx3,
+                tokenIdIdx4,
+                tokenIdIdx5,
+                tokenIdIdx6,
+                tokenIdIdx7,
+            ]
+        )
+        assert.equal(merkleRoot.toString(), merkleResult.merkleRoot.toString(), "wrong merkleRoot");
         const sellCalldataNew = await niftyConnectExchangeInst.buildCallData(
             ERC721TransferSelector, // uint selector,
             player0, // address from,
@@ -2476,8 +2578,8 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             TestERC721.address,// address nftAddress,
             tokenIdIdx2, // uint256 tokenId,
             ERC721_AMOUNT,// uint256 amount,
-            merkleRoot, // bytes32 merkleRoot
-            merkleProofNew,// bytes32[] memory merkleProof
+            merkleResult.merkleRoot, // bytes32 merkleRoot
+            merkleResult.merkleProof,// bytes32[] memory merkleProof
         );
 
         await niftyConnectExchangeInst.atomicMatch_(

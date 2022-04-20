@@ -14,7 +14,7 @@
     "lint:sol": "solhint 'contracts/*.sol' && solhint 'contracts/**/*.sol'",
     "flatten": "truffle-flattener contracts/RoyaltyRegisterHub.sol > flatten/RoyaltyRegisterHub.sol && truffle-flattener contracts/MerkleValidator.sol > flatten/MerkleValidator.sol && truffle-flattener contracts/NiftyConnectExchange.sol > flatten/NiftyConnectExchange.sol && truffle-flattener contracts/NiftyConnectTokenTransferProxy.sol > flatten/NiftyConnectTokenTransferProxy.sol && truffle-flattener contracts/NiftyConnectProxyRegistry.sol > flatten/NiftyConnectProxyRegistry.sol"
   },
-  "author": "braydenbc",
+  "author": "charlene",
   "license": "Apache License",
   "dependencies": {
     "commander": "^3.0.1",
@@ -43,6 +43,7 @@
     "eslint-plugin-standard": "^4.0.1",
     "y18n": ">=3.2.2",
     "@openzeppelin/test-helpers": "^0.5.15",
-    "openzeppelin-solidity": "v2.0.1"
+    "openzeppelin-solidity": "v2.0.1",
+    "keccak256": "1.0.6"
   }
 }

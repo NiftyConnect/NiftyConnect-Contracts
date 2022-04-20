@@ -1,5 +1,6 @@
 pragma solidity 0.4.26;
 
+import "./SafeMath.sol";
 import "./ExchangeCore.sol";
 import "./SaleKindInterface.sol";
 import "./AuthenticatedProxy.sol";
@@ -65,7 +66,7 @@ contract Exchange is ExchangeCore {
         }
         require(uints[8]>=2&&merkleRoot!=bytes32(0x00), "invalid merkle data");
         uint256 merkleProofLength;
-        for(uint256 divResult = uints[8]/2;divResult!=0;divResult=divResult/2) {
+        for(uint256 divResult = SafeMath.add(uints[8],1)/2;divResult!=0;divResult=divResult/2) {
             merkleProofLength++;
         }
         merkleProof = new bytes32[](merkleProofLength);
@@ -113,8 +114,8 @@ contract Exchange is ExchangeCore {
     {
         bytes memory orderCallData = buildCallDataInternal(addrs[8],addrs[9],addrs[5],uints,merkleRoot);
         return hashToSign(
-        Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]),
-    nonces[addrs[1]]
+            Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]),
+            nonces[addrs[1]]
         );
     }
 
