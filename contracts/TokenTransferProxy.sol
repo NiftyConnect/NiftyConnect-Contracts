@@ -1,13 +1,21 @@
 pragma solidity 0.4.26;
 
 import "./ERC20.sol";
-import "./ProxyRegistry.sol";
 
 contract TokenTransferProxy {
 
-    /* Authentication registry. */
-    ProxyRegistry public registry;
+    /* Whether initialized. */
+    bool public initialized = false;
 
+    address public exchangeAddress;
+
+    function initialize (address _exchangeAddress)
+    public
+    {
+        require(!initialized);
+        initialized = true;
+        exchangeAddress = _exchangeAddress;
+    }
     /**
      * Call ERC20 `transferFrom`
      *
@@ -21,7 +29,7 @@ contract TokenTransferProxy {
     public
     returns (bool)
     {
-        require(registry.contracts(msg.sender));
+        require(msg.sender==exchangeAddress, "not authorized");
         return ERC20(token).transferFrom(from, to, amount);
     }
 

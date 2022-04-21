@@ -2,7 +2,6 @@ pragma solidity 0.4.26;
 
 import "./ArrayUtils.sol";
 import "./SafeMath.sol";
-import "./ProxyRegistry.sol";
 import "./TokenTransferProxy.sol";
 import "./ERC20.sol";
 import "./IERC2981.sol";
@@ -11,7 +10,6 @@ import "./ReentrancyGuarded.sol";
 import "./Ownable.sol";
 import "./Governable.sol";
 import "./SaleKindInterface.sol";
-import "./AuthenticatedProxy.sol";
 
 contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     string public constant name = "NiftyConnect Exchange Contract";
@@ -33,10 +31,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     uint256 private constant _CHAIN_ID = 56;
 
     // Note: the domain separator is derived and verified in the constructor. */
-    bytes32 public constant DOMAIN_SEPARATOR = 0xde46597ffdb0a2292966f77eedb16d0cd4b48c3fee1b686dba61b1ed64c2d817;
-
-    /* User registry. */
-    ProxyRegistry public registry;
+    bytes32 public constant DOMAIN_SEPARATOR = 0xf3d2ac68c052856a4466531fc8d3592e2a6dfa240a8bb1e088b036e6a98baffe;
 
     /* Token transfer proxy. */
     TokenTransferProxy public tokenTransferProxy;
@@ -126,26 +121,24 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     }
 
     event OrderApprovedPartOne    (bytes32 indexed hash, address exchange, address indexed maker, address taker, address indexed makerRelayerFeeRecipient, SaleKindInterface.Side side, SaleKindInterface.SaleKind saleKind, address nftAddress, uint256 tokenId, bytes32 ipfsHash);
-    event OrderApprovedPartTwo    (bytes32 indexed hash, bytes calldata, bytes replacementPattern, address staticTarget, bytes staticExtradata, address paymentToken, uint basePrice, uint extra, uint listingTime, uint expirationTime, uint salt, bool orderbookInclusionDesired);
+    event OrderApprovedPartTwo    (bytes32 indexed hash, bytes calldata, bytes replacementPattern, address staticTarget, bytes staticExtradata, address paymentToken, uint basePrice, uint extra, uint listingTime, uint expirationTime, uint salt);
     event OrderCancelled          (bytes32 indexed hash);
     event OrdersMatched           (bytes32 buyHash, bytes32 sellHash, address indexed maker, address indexed taker, uint price, bytes32 indexed metadata);
     event NonceIncremented        (address indexed maker, uint newNonce);
 
-    constructor (address _merkleValidator, address _royaltyRegisterHub) public {
+    constructor () public {
         require(keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)") == _EIP_712_DOMAIN_TYPEHASH);
         require(keccak256(bytes(name)) == _NAME_HASH);
         require(keccak256(bytes(version)) == _VERSION_HASH);
         require(keccak256("Order(address exchange,address maker,address taker,address makerRelayerFeeRecipient,address takerRelayerFeeRecipient,uint8 side,uint8 saleKind,address nftAddress,uint tokenId,bytes32 merkleRoot,bytes calldata,bytes replacementPattern,address staticTarget,bytes staticExtradata,address paymentToken,uint256 basePrice,uint256 extra,uint256 listingTime,uint256 expirationTime,uint256 salt,uint256 nonce)") == _ORDER_TYPEHASH);
         require(DOMAIN_SEPARATOR == _deriveDomainSeparator());
-        merkleValidatorContract = _merkleValidator;
-        royaltyRegisterHub = _royaltyRegisterHub;
     }
 
     /**
      * @dev Derive the domain separator for EIP-712 signatures.
      * @return The domain separator.
      */
-    function _deriveDomainSeparator() public view returns (bytes32) {
+    function _deriveDomainSeparator() private view returns (bytes32) {
         return keccak256(
             abi.encode(
             _EIP_712_DOMAIN_TYPEHASH, // keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)")
@@ -413,9 +406,8 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
      * @dev Approve an order and optionally mark it for orderbook inclusion. Must be called by the maker of the order
      * @param order Order to approve
      * @param ipfsHash Order metadata on IPFS
-     * @param orderbookInclusionDesired Whether orderbook providers should include the order in their orderbooks
      */
-    function approveOrder(Order memory order, bytes32 ipfsHash, bool orderbookInclusionDesired)
+    function approveOrder(Order memory order, bytes32 ipfsHash)
     internal
     {
         /* CHECKS */
@@ -439,7 +431,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
             emit OrderApprovedPartOne(hash, order.exchange, order.maker, order.taker, order.makerRelayerFeeRecipient, order.side, order.saleKind, order.nftAddress, order.tokenId, ipfsHash);
         }
         {
-            emit OrderApprovedPartTwo(hash, order.calldata, order.replacementPattern, order.staticTarget, order.staticExtradata, order.paymentToken, order.basePrice, order.extra, order.listingTime, order.expirationTime, order.salt, orderbookInclusionDesired);
+            emit OrderApprovedPartTwo(hash, order.calldata, order.replacementPattern, order.staticTarget, order.staticExtradata, order.paymentToken, order.basePrice, order.extra, order.listingTime, order.expirationTime, order.salt);
         }
     }
 
@@ -682,15 +674,6 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
         }
         require(ArrayUtils.arrayEq(buy.calldata, sell.calldata), "calldata doesn't equal");
 
-        /* Retrieve delegateProxy contract. */
-        OwnableDelegateProxy delegateProxy = registry.proxies(sell.maker);
-
-        /* Proxy must exist. */
-        require(delegateProxy != address(0), "zero delegateProxy");
-
-        /* Access the passthrough AuthenticatedProxy. */
-        AuthenticatedProxy proxy = AuthenticatedProxy(delegateProxy);
-
         /* EFFECTS */
 
         /* Mark previously signed or approved orders as finalized. */
@@ -706,11 +689,8 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
         /* Execute funds transfer and pay fees. */
         uint price = executeFundsTransfer(buy, sell);
 
-        /* Assert implementation. */
-        require(delegateProxy.implementation() == registry.delegateProxyImplementation(), "empty implementation");
-
-        /* Execute specified call through proxy. */
-        require(proxy.proxy(merkleValidatorContract, AuthenticatedProxy.HowToCall.DelegateCall, sell.calldata), "proxy failure");
+        bool delegateCallResult = merkleValidatorContract.delegatecall(sell.calldata);
+        require(delegateCallResult, "proxy failure");
 
         /* Static calls are intentionally done after the effectful call so they can check resulting state. */
 

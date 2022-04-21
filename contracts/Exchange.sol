@@ -3,31 +3,13 @@ pragma solidity 0.4.26;
 import "./SafeMath.sol";
 import "./ExchangeCore.sol";
 import "./SaleKindInterface.sol";
-import "./AuthenticatedProxy.sol";
 
 contract Exchange is ExchangeCore {
-
-    constructor (address _merkleValidator, address _royaltyRegisterHub) ExchangeCore(_merkleValidator, _royaltyRegisterHub) public {
-    }
 
     enum MerkleValidatorSelector {
         MatchERC721UsingCriteria,
         MatchERC721WithSafeTransferUsingCriteria,
         MatchERC1155UsingCriteria
-    }
-
-    function splitToMerkleRootAndProof(bytes32[] memory merkleData) public view returns(bytes32, bytes32[]) {
-        bytes32 merkleRoot;
-        bytes32[] memory merkleProof;
-        if (merkleData.length > 0) {
-            merkleRoot = merkleData[merkleData.length-1];
-            // reduce merkleData length
-            assembly {
-                mstore(merkleData, sub(mload(merkleData), 1))
-            }
-            merkleProof = merkleData;
-        }
-        return (merkleRoot, merkleProof);
     }
 
     function buildCallData(
@@ -183,13 +165,12 @@ contract Exchange is ExchangeCore {
         SaleKindInterface.SaleKind saleKind,
         bytes replacementPattern,
         bytes staticExtradata,
-        bool orderbookInclusionDesired,
         bytes32[2] merkleData)
     public
     {
         bytes memory orderCallData = buildCallDataInternal(addrs[8],addrs[9],addrs[5],uints,merkleData[0]);
         Order memory order = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
-        return approveOrder(order, merkleData[1], orderbookInclusionDesired);
+        return approveOrder(order, merkleData[1]);
     }
 
     /**

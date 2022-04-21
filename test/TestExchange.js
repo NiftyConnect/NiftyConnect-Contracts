@@ -7,7 +7,6 @@ const sleep = require("await-sleep");
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 
 const NiftyConnectExchange = artifacts.require("NiftyConnectExchange");
-const NiftyConnectProxyRegistry = artifacts.require("NiftyConnectProxyRegistry");
 const NiftyConnectTokenTransferProxy = artifacts.require("NiftyConnectTokenTransferProxy");
 
 const TestERC721 = artifacts.require("TestERC721");
@@ -105,8 +104,6 @@ function generateMerkleProofAndRoot(targetTokenId, tokenIds) {
         tempProofLength = Math.floor((tempProofLength+1)/2)
         tempProof = new Array(tempProofLength);
     }
-    console.log("merkleRoot: "+merkleRoot);
-    console.log("merkleProof: "+merkleProof);
     return {merkleRoot, merkleProof};
 }
 
@@ -147,7 +144,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         assert.equal(nftERC1155Symbol.toString(), "Test1155", "wrong nftSymbol");
     });
     it('Test Account Init', async () => {
-        const niftyConnectProxyRegistryInst = await NiftyConnectProxyRegistry.deployed();
         const testERC721Inst = await TestERC721.deployed();
         const testERC1155Inst = await TestERC1155.deployed();
         const testERC20Inst = await TestERC20.deployed();
@@ -155,17 +151,11 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const player0 = accounts[1];
         const player1 = accounts[2];
 
-        await niftyConnectProxyRegistryInst.registerProxy({from: player0});
-        await niftyConnectProxyRegistryInst.registerProxy({from: player1});
+        await testERC721Inst.setApprovalForAll(NiftyConnectExchange.address, true, {from: player0});
+        await testERC721Inst.setApprovalForAll(NiftyConnectExchange.address, true, {from: player1});
 
-        const player0Proxy = await niftyConnectProxyRegistryInst.proxies(player0);
-        const player1Proxy = await niftyConnectProxyRegistryInst.proxies(player1);
-
-        await testERC721Inst.setApprovalForAll(player0Proxy, true, {from: player0});
-        await testERC721Inst.setApprovalForAll(player1Proxy, true, {from: player1});
-
-        await testERC1155Inst.setApprovalForAll(player0Proxy, true, {from: player0});
-        await testERC1155Inst.setApprovalForAll(player1Proxy, true, {from: player1});
+        await testERC1155Inst.setApprovalForAll(NiftyConnectExchange.address, true, {from: player0});
+        await testERC1155Inst.setApprovalForAll(NiftyConnectExchange.address, true, {from: player1});
 
         await testERC20Inst.approve(NiftyConnectTokenTransferProxy.address, web3.utils.toBN(1e18).mul(web3.utils.toBN(1e18)), {from: player0});
         await testERC20Inst.approve(NiftyConnectTokenTransferProxy.address, web3.utils.toBN(1e18).mul(web3.utils.toBN(1e18)), {from: player1});
@@ -189,7 +179,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         const sellCalldata = await niftyConnectExchangeInst.buildCallData(
             ERC721TransferSelector, // uint selector,
-            player0.toString(), // address from,
+            player0, // address from,
             "0x0000000000000000000000000000000000000000", // address to,
             TestERC721.address,// address nftAddress,
             tokenIdIdx, // uint256 tokenId,
@@ -224,7 +214,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let latestBlock = await web3.eth.getBlock("latest");
         let timestamp = latestBlock.timestamp;
         let expireTime = web3.utils.toBN(timestamp).add(web3.utils.toBN(3600)); // expire at one hour later
-
 
         let salt = "0x"+crypto.randomBytes(32).toString("hex");
 
@@ -288,7 +277,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             0,                      // saleKind
             sellReplacementPattern, // replacementPattern
             [],                     // staticExtradata
-            true,                   // orderbookInclusionDesired
             [
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -473,7 +461,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await niftyConnectExchangeInst.atomicMatch_(
             [   // address[16] addrs,
                 //buy
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 player0,                                            // taker
                 "0x0000000000000000000000000000000000000000",       // makerRelayerFeeRecipient
@@ -483,7 +471,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 "0x0000000000000000000000000000000000000000",       // paymentToken
 
                 //sell
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
@@ -569,7 +557,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             0,                      // saleKind
             sellReplacementPattern, // replacementPattern
             [],                     // staticExtradata
-            true,                   // orderbookInclusionDesired
             [
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -704,7 +691,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             0,                      // saleKind
             sellReplacementPattern, // replacementPattern
             [],                     // staticExtradata
-            true,                   // orderbookInclusionDesired
             [
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -944,7 +930,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             0,                      // saleKind
             sellReplacementPattern, // replacementPattern
             [],                     // staticExtradata
-            true,                   // orderbookInclusionDesired
             [
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -1121,7 +1106,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             0,                      // saleKind
             sellReplacementPattern, // replacementPattern
             [],                     // staticExtradata
-            true,                   // orderbookInclusionDesired
             [
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -1253,7 +1237,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             0,                      // saleKind
             sellReplacementPattern, // replacementPattern
             [],                     // staticExtradata
-            true,                   // orderbookInclusionDesired
             [
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -1456,7 +1439,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             0,                      // saleKind
             buyReplacementPattern,  // replacementPattern
             [],                     // staticExtradata
-            true,                   // orderbookInclusionDesired
             [
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -1668,7 +1650,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             0,                      // saleKind
             buyReplacementPattern,  // replacementPattern
             [],                     // staticExtradata
-            true,                   // orderbookInclusionDesired
             [
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -1886,7 +1867,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             1,                      // saleKind
             sellReplacementPattern, // replacementPattern
             [],                     // staticExtradata
-            true,                   // orderbookInclusionDesired
             [
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -2139,7 +2119,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             0,                      // saleKind
             buyReplacementPattern,  // replacementPattern
             [],                     // staticExtradata
-            true,                   // orderbookInclusionDesired
             [
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -2174,7 +2153,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             0,                      // saleKind
             buyReplacementPattern,  // replacementPattern
             [],                     // staticExtradata
-            true,                   // orderbookInclusionDesired
             [
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -2431,7 +2409,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             0,                      // saleKind
             buyReplacementPattern,  // replacementPattern
             [],                     // staticExtradata
-            true,                   // orderbookInclusionDesired
             [
                 merkleRoot,
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -2559,7 +2536,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             0,                      // saleKind
             buyReplacementPattern,  // replacementPattern
             [],                     // staticExtradata
-            true,                   // orderbookInclusionDesired
             [
                 merkleRoot,
                 "0x0000000000000000000000000000000000000000000000000000000000000000"

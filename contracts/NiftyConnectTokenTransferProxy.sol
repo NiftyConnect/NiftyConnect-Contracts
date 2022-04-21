@@ -4,10 +4,4 @@ import "./TokenTransferProxy.sol";
 
 contract NiftyConnectTokenTransferProxy is TokenTransferProxy {
 
-    constructor (ProxyRegistry registryAddr)
-    public
-    {
-        registry = registryAddr;
-    }
-
 }
