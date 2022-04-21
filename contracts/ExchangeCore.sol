@@ -689,8 +689,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
         /* Execute funds transfer and pay fees. */
         uint price = executeFundsTransfer(buy, sell);
 
-        bool delegateCallResult = merkleValidatorContract.delegatecall(sell.calldata);
-        require(delegateCallResult, "proxy failure");
+        require(merkleValidatorContract.delegatecall(sell.calldata), "order calldata failure");
 
         /* Static calls are intentionally done after the effectful call so they can check resulting state. */
 

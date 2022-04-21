@@ -29,7 +29,7 @@ contract MerkleValidator {
         uint256 tokenId,
         bytes32 root,
         bytes32[] proof
-    ) external returns (bool) {
+    ) payable external returns (bool) {
         // Proof verification is performed when there's a non-zero root.
         if (root != bytes32(0)) {
             verifyProof(tokenId, root, proof);
@@ -59,7 +59,7 @@ contract MerkleValidator {
         uint256 tokenId,
         bytes32 root,
         bytes32[] proof
-    ) external returns (bool) {
+    ) payable external returns (bool) {
         // Proof verification is performed when there's a non-zero root.
         if (root != bytes32(0)) {
             verifyProof(tokenId, root, proof);
@@ -91,7 +91,7 @@ contract MerkleValidator {
         uint256 amount,
         bytes32 root,
         bytes32[] proof
-    ) external returns (bool) {
+    ) payable external returns (bool) {
         // Proof verification is performed when there's a non-zero root.
         if (root != bytes32(0)) {
             verifyProof(tokenId, root, proof);
