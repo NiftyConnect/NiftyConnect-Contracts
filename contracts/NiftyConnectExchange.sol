@@ -79,9 +79,6 @@ contract NiftyConnectExchange is ExchangeCore {
         return buildCallData(uints[5],from,to,nftAddress,uints[6],uints[7],merkleRoot,merkleProof);
     }
 
-    /**
-     * @dev Call guardedArrayReplace - library function exposed for testing.
-     */
     function guardedArrayReplace(bytes array, bytes desired, bytes mask)
     public
     pure
@@ -91,9 +88,6 @@ contract NiftyConnectExchange is ExchangeCore {
         return array;
     }
 
-    /**
-     * @dev Call calculateFinalPrice - library function exposed for testing.
-     */
     function calculateFinalPrice(SaleKindInterface.Side side, SaleKindInterface.SaleKind saleKind, uint basePrice, uint extra, uint listingTime, uint expirationTime)
     public
     view
@@ -102,9 +96,6 @@ contract NiftyConnectExchange is ExchangeCore {
         return SaleKindInterface.calculateFinalPrice(side, saleKind, basePrice, extra, listingTime, expirationTime);
     }
 
-    /**
-     * @dev Call hashOrder - Solidity ABI encoding limitation workaround, hopefully temporary.
-     */
     function hashToSign_(
         address[10] addrs,
         uint[9] uints,
@@ -124,9 +115,6 @@ contract NiftyConnectExchange is ExchangeCore {
         );
     }
 
-    /**
-     * @dev Call validateOrderParameters - Solidity ABI encoding limitation workaround, hopefully temporary.
-     */
     function validateOrderParameters_ (
         address[10] addrs,
         uint[9] uints,
@@ -145,9 +133,6 @@ contract NiftyConnectExchange is ExchangeCore {
         );
     }
 
-    /**
-     * @dev Call validateOrder - Solidity ABI encoding limitation workaround, hopefully temporary.
-     */
     function validateOrder_ (
         address[10] addrs,
         uint[9] uints,
@@ -168,10 +153,7 @@ contract NiftyConnectExchange is ExchangeCore {
         );
     }
 
-    /**
-     * @dev Call approveOrder - Solidity ABI encoding limitation workaround, hopefully temporary.
-     */
-    function approveOrder_ (
+    function makeOrder_ (
         address[10] addrs,
         uint[9] uints,
         SaleKindInterface.Side side,
@@ -183,12 +165,9 @@ contract NiftyConnectExchange is ExchangeCore {
     {
         bytes memory orderCallData = buildCallDataInternal(addrs[8],addrs[9],addrs[5],uints,merkleData[0]);
         Order memory order = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
-        return approveOrder(order, merkleData[1]);
+        return makeOrder(order, merkleData[1]);
     }
 
-    /**
-     * @dev Call cancelOrder - Solidity ABI encoding limitation workaround, hopefully temporary.
-     */
     function cancelOrder_(
         address[10] addrs,
         uint[9] uints,
@@ -207,9 +186,6 @@ contract NiftyConnectExchange is ExchangeCore {
         );
     }
 
-    /**
-     * @dev Call calculateCurrentPrice - Solidity ABI encoding limitation workaround, hopefully temporary.
-     */
     function calculateCurrentPrice_(
         address[10] addrs,
         uint[9] uints,
@@ -228,9 +204,6 @@ contract NiftyConnectExchange is ExchangeCore {
         );
     }
 
-    /**
-     * @dev Call ordersCanMatch - Solidity ABI encoding limitation workaround, hopefully temporary.
-     */
     function ordersCanMatch_(
         address[16] addrs,
         uint[12] uints,
@@ -253,14 +226,6 @@ contract NiftyConnectExchange is ExchangeCore {
         );
     }
 
-    /**
-     * @dev Return whether or not two orders' calldata specifications can match
-     * @param buyCalldata Buy-side order calldata
-     * @param buyReplacementPattern Buy-side order calldata replacement mask
-     * @param sellCalldata Sell-side order calldata
-     * @param sellReplacementPattern Sell-side order calldata replacement mask
-     * @return Whether the orders' calldata can be matched
-     */
     function orderCalldataCanMatch(bytes buyCalldata, bytes buyReplacementPattern, bytes sellCalldata, bytes sellReplacementPattern)
     public
     pure
@@ -275,9 +240,6 @@ contract NiftyConnectExchange is ExchangeCore {
         return ArrayUtils.arrayEq(buyCalldata, sellCalldata);
     }
 
-    /**
-     * @dev Call calculateMatchPrice - Solidity ABI encoding limitation workaround, hopefully temporary.
-     */
     function calculateMatchPrice_(
         address[16] addrs,
         uint[12] uints,
@@ -300,10 +262,7 @@ contract NiftyConnectExchange is ExchangeCore {
         );
     }
 
-    /**
-     * @dev Call atomicMatch - Solidity ABI encoding limitation workaround, hopefully temporary.
-     */
-    function atomicMatch_(
+    function takeOrder_(
         address[16] addrs,
         uint[12] uints,
         uint8[4] sidesKinds,
@@ -318,7 +277,7 @@ contract NiftyConnectExchange is ExchangeCore {
     payable
     {
 
-        return atomicMatch(
+        return takeOrder(
             Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], SaleKindInterface.Side(sidesKinds[0]), SaleKindInterface.SaleKind(sidesKinds[1]), addrs[5], uints[5], calldataBuy, replacementPatternBuy, addrs[6], staticExtradataBuy, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]),
             Order(addrs[8], addrs[9], addrs[10], addrs[11], addrs[12], SaleKindInterface.Side(sidesKinds[2]), SaleKindInterface.SaleKind(sidesKinds[3]), addrs[13], uints[11], calldataSell, replacementPatternSell, addrs[14], staticExtradataSell, ERC20(addrs[15]), uints[6], uints[7], uints[8], uints[9], uints[10]),
             rssMetadata

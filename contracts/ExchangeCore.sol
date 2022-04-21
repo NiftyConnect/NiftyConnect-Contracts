@@ -407,7 +407,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
      * @param order Order to approve
      * @param ipfsHash Order metadata on IPFS
      */
-    function approveOrder(Order memory order, bytes32 ipfsHash)
+    function makeOrder(Order memory order, bytes32 ipfsHash)
     internal
     {
         /* CHECKS */
@@ -640,7 +640,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
      * @param buy Buy-side order
      * @param sell Sell-side order
      */
-    function atomicMatch(Order memory buy, Order memory sell, bytes32 metadata)
+    function takeOrder(Order memory buy, Order memory sell, bytes32 metadata)
     internal
     reentrancyGuard
     {

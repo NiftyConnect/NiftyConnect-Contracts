@@ -249,7 +249,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         );
         assert.equal(isOrderParameterValid, true, "wrong order parameter check result");
 
-        await niftyConnectExchangeInst.approveOrder_(
+        await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player0,                                            // maker
@@ -458,7 +458,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         assert.equal(matchPrice.toString(), exchangePrice.toString(), "exchange price mismatch");
 
-        await niftyConnectExchangeInst.atomicMatch_(
+        await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
                 NiftyConnectExchange.address,                       // exchange
@@ -529,7 +529,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         ));
 
         salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.approveOrder_(
+        await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player1,                                            // maker
@@ -663,7 +663,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const exchangePrice = web3.utils.toBN(1e18)
 
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.approveOrder_(
+        await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player0,                                            // maker
@@ -759,7 +759,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const initProtocolFeeRecipientERC20Balance = await testERC20Inst.balanceOf(protocolFeeRecipient);
         const initRoyaltyReceiverERC20Balance = await testERC20Inst.balanceOf(royaltyReceiver);
 
-        await niftyConnectExchangeInst.atomicMatch_(
+        await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
                 NiftyConnectExchange.address,                          // exchange
@@ -902,7 +902,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let expireTime = web3.utils.toBN(timestamp).add(web3.utils.toBN(3600)); // expire at one hour later
         let exchangePrice = web3.utils.toBN(1e18);
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.approveOrder_(
+        await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player0,                                            // maker
@@ -1007,7 +1007,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         assert.equal(ordersCanMatch_, true, "wrong ordersCanMatch_ result");
 
-        await niftyConnectExchangeInst.atomicMatch_(
+        await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
                 NiftyConnectExchange.address,                          // exchange
@@ -1078,7 +1078,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         ));
 
         salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.approveOrder_(
+        await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player1,                                            // maker
@@ -1209,7 +1209,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const exchangePrice = web3.utils.toBN(1e18)
 
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.approveOrder_(
+        await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player0,                                            // maker
@@ -1283,7 +1283,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const initProtocolFeeRecipientERC20Balance = await testERC20Inst.balanceOf(protocolFeeRecipient);
         const initRoyaltyReceiverERC20Balance = await testERC20Inst.balanceOf(royaltyReceiver);
 
-        await niftyConnectExchangeInst.atomicMatch_(
+        await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
                 NiftyConnectExchange.address,                          // exchange
@@ -1411,7 +1411,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let expireTime = web3.utils.toBN(timestamp).add(web3.utils.toBN(3600)); // expire at one hour later
         let exchangePrice = web3.utils.toBN(1e18);
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.approveOrder_(
+        await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player1,                                            // maker
@@ -1492,7 +1492,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const initProtocolFeeRecipientERC20Balance = await testERC20Inst.balanceOf(protocolFeeRecipient);
         const initRoyaltyReceiverERC20Balance = await testERC20Inst.balanceOf(royaltyReceiver);
 
-        await niftyConnectExchangeInst.atomicMatch_(
+        await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
                 NiftyConnectExchange.address,                          // exchange
@@ -1622,7 +1622,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let expireTime = web3.utils.toBN(timestamp).add(web3.utils.toBN(3600)); // expire at one hour later
         let exchangePrice = web3.utils.toBN(1e18);
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.approveOrder_(
+        await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player1,                                            // maker
@@ -1704,7 +1704,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const initProtocolFeeRecipientERC20Balance = await testERC20Inst.balanceOf(protocolFeeRecipient);
         const initRoyaltyReceiverERC20Balance = await testERC20Inst.balanceOf(royaltyReceiver);
 
-        await niftyConnectExchangeInst.atomicMatch_(
+        await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
                 NiftyConnectExchange.address,                          // exchange
@@ -1839,7 +1839,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         let salt = "0x"+crypto.randomBytes(32).toString("hex");
 
-        await niftyConnectExchangeInst.approveOrder_(
+        await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player0,                                            // maker
@@ -1951,7 +1951,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             "0x00",                 // merkleRoot
         );
 
-        const atomicMatchTx = await niftyConnectExchangeInst.atomicMatch_(
+        const atomicMatchTx = await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
                 NiftyConnectExchange.address,                          // exchange
@@ -2091,7 +2091,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let exchangePrice = web3.utils.toBN(1e18);
         let salt1 = "0x"+crypto.randomBytes(32).toString("hex")
         let salt2 = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.approveOrder_(
+        await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player1,                                            // maker
@@ -2125,7 +2125,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             ],                      // merkleData
             {from: player1}
         );
-        await niftyConnectExchangeInst.approveOrder_(
+        await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player1,                                            // maker
@@ -2188,7 +2188,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             "0000000000000000000000000000000000000000000000000000000000000000"
         ));
 
-        await niftyConnectExchangeInst.atomicMatch_(
+        await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
                 NiftyConnectExchange.address,                          // exchange
@@ -2251,7 +2251,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             [],// bytes32[] memory merkleProof
         );
 
-        await niftyConnectExchangeInst.atomicMatch_(
+        await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
                 NiftyConnectExchange.address,                          // exchange
@@ -2381,7 +2381,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let expireTime = web3.utils.toBN(timestamp).add(web3.utils.toBN(3600)); // expire at one hour later
         let exchangePrice = web3.utils.toBN(1e18);
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
-        const approveOrderTx = await niftyConnectExchangeInst.approveOrder_(
+        const approveOrderTx = await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player1,                                            // maker
@@ -2451,7 +2451,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             "0000000000000000000000000000000000000000000000000000000000000000"
         ));
 
-        await niftyConnectExchangeInst.atomicMatch_(
+        await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
                 NiftyConnectExchange.address,                          // exchange
@@ -2508,7 +2508,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         expireTime = web3.utils.toBN(timestamp).add(web3.utils.toBN(3600)); // expire at one hour later
         exchangePrice = web3.utils.toBN(1e18);
         salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.approveOrder_(
+        await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
@@ -2569,7 +2569,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             merkleResult.merkleProof,// bytes32[] memory merkleProof
         );
 
-        await niftyConnectExchangeInst.atomicMatch_(
+        await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
                 NiftyConnectExchange.address,                       // exchange
