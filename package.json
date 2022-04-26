@@ -12,7 +12,7 @@
     "coverage": "truffle run coverage --network development",
     "lint": "npm run lint:sol",
     "lint:sol": "solhint 'contracts/*.sol' && solhint 'contracts/**/*.sol'",
-    "flatten": "truffle-flattener contracts/RoyaltyRegisterHub.sol > flatten/RoyaltyRegisterHub.sol && truffle-flattener contracts/MerkleValidator.sol > flatten/MerkleValidator.sol && truffle-flattener contracts/NiftyConnectExchange.sol > flatten/NiftyConnectExchange.sol && truffle-flattener contracts/NiftyConnectTokenTransferProxy.sol > flatten/NiftyConnectTokenTransferProxy.sol && truffle-flattener contracts/NiftyConnectProxyRegistry.sol > flatten/NiftyConnectProxyRegistry.sol"
+    "flatten": "truffle-flattener contracts/RoyaltyRegisterHub.sol > flatten/RoyaltyRegisterHub.sol && truffle-flattener contracts/MerkleValidator.sol > flatten/MerkleValidator.sol && truffle-flattener contracts/NiftyConnectExchange.sol > flatten/NiftyConnectExchange.sol && truffle-flattener contracts/NiftyConnectTokenTransferProxy.sol > flatten/NiftyConnectTokenTransferProxy.sol"
   },
   "author": "charlene",
   "license": "Apache License",
