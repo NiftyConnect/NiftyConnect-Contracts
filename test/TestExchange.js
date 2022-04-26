@@ -114,9 +114,68 @@ function generateMerkleProofAndRoot(targetTokenId, tokenIds) {
     return {merkleRoot, merkleProof};
 }
 
-function generateBuyReplacementPattern(totalLeaf) {
-    const merkleProofLength = calculateProofLength(totalLeaf);
+function generateBuyReplacementPatternForNormalOrder(isERC1155) {
+    let buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
+        "0x" +
+        "00000000" +                                                          // selector
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +  // from
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // to
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // token
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // tokenId
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleRoot
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleProof Offset
+        "0000000000000000000000000000000000000000000000000000000000000000"    // merkleProof Length
+    ));
 
+    if (isERC1155 === true) {
+        buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
+            "0x" +
+            "00000000" +                                                          // selector
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +  // from
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // to
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // token
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // tokenId
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // amount
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleRoot
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleProof Offset
+            "0000000000000000000000000000000000000000000000000000000000000000"    // merkleProof Length
+        ));
+    }
+    return buyReplacementPattern;
+}
+
+function generateSellReplacementPatternForNormalOrder(isERC1155) {
+    let sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
+        "0x" +
+        "00000000" +                                                          // selector
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // from
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +  // to
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // token
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // tokenId
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleRoot
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleProof Offset
+        "0000000000000000000000000000000000000000000000000000000000000000"    // merkleProof Length
+    ));
+
+    if (isERC1155 === true) {
+        sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
+            "0x" +
+            "00000000" +                                                          // selector
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // from
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +  // to
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // token
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // tokenId
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // amount
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleRoot
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleProof Offset
+            "0000000000000000000000000000000000000000000000000000000000000000"    // merkleProof Length
+        ));
+    }
+
+    return sellReplacementPattern;
+}
+
+function generateBuyReplacementPatternForCollectionBasedOrder(isERC1155) {
     let buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
         "0x" +
         "00000000" +                                                          // selector
@@ -124,41 +183,134 @@ function generateBuyReplacementPattern(totalLeaf) {
         "0000000000000000000000000000000000000000000000000000000000000000" +  // to
         "0000000000000000000000000000000000000000000000000000000000000000" +  // token
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +  // tokenId
-        "0000000000000000000000000000000000000000000000000000000000000000" +
-        "0000000000000000000000000000000000000000000000000000000000000000" +
-        "0000000000000000000000000000000000000000000000000000000000000000"
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleRoot
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleProof Offset
+        "0000000000000000000000000000000000000000000000000000000000000000"    // merkleProof Length
     ));
 
-    for(let idx=0; idx<merkleProofLength;idx++) {
-        buyReplacementPattern = Buffer.concat([
-            buyReplacementPattern,
-            Buffer.from(web3.utils.hexToBytes("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
-        ]);
+    if (isERC1155 === true) {
+        buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
+            "0x" +
+            "00000000" +                                                          // selector
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +  // from
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // to
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // token
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +  // tokenId
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // amount
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleRoot
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleProof Offset
+            "0000000000000000000000000000000000000000000000000000000000000000"    // merkleProof Length
+        ));
     }
     return buyReplacementPattern;
-
 }
 
-function generateSellReplacementPattern(totalLeaf) {
-    const merkleProofLength = calculateProofLength(totalLeaf);
-
+function generateSellReplacementPatternForCollectionBasedOrder(isERC1155) {
     let sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
         "0x" +
-        "00000000" +
-        "0000000000000000000000000000000000000000000000000000000000000000" + // selector
-        "0000000000000000000000000000000000000000000000000000000000000000" + // from
-        "0000000000000000000000000000000000000000000000000000000000000000" + // to
-        "0000000000000000000000000000000000000000000000000000000000000000" + // token
-        "0000000000000000000000000000000000000000000000000000000000000000" + // tokenId
-        "0000000000000000000000000000000000000000000000000000000000000000" +
-        "0000000000000000000000000000000000000000000000000000000000000000"
+        "00000000" +                                                          // selector
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // from
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // to
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // token
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // tokenId
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleRoot
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleProof Offset
+        "0000000000000000000000000000000000000000000000000000000000000000"    // merkleProof Length
     ));
 
-    for(let idx=0; idx<merkleProofLength;idx++) {
-        sellReplacementPattern = Buffer.concat([
-            sellReplacementPattern,
-            Buffer.from(web3.utils.hexToBytes("0x0000000000000000000000000000000000000000000000000000000000000000"))
-        ]);
+    if (isERC1155 === true) {
+        sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
+            "0x" +
+            "00000000" +                                                          // selector
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // from
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // to
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // token
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // tokenId
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // amount
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleRoot
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleProof Offset
+            "0000000000000000000000000000000000000000000000000000000000000000"    // merkleProof Length
+        ));
+    }
+    return sellReplacementPattern;
+}
+
+function generateBuyReplacementPatternForTraitBasedOrder(totalLeaf, isERC1155) {
+    let buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
+        "0x" +
+        "00000000" +                                                          // selector
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +  // from
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // to
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // token
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +  // tokenId
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleRoot
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleProof Offset
+        "0000000000000000000000000000000000000000000000000000000000000000"    // merkleProof Length
+    ));
+
+    if (isERC1155 === true) {
+        buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
+            "0x" +
+            "00000000" +                                                          // selector
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +  // from
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // to
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // token
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +  // tokenId
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // amount
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleRoot
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleProof Offset
+            "0000000000000000000000000000000000000000000000000000000000000000"    // merkleProof Length
+        ));
+    }
+
+    if (totalLeaf>=2) {
+        const merkleProofLength = calculateProofLength(totalLeaf);
+        for(let idx=0; idx<merkleProofLength;idx++) {
+            buyReplacementPattern = Buffer.concat([
+                buyReplacementPattern,
+                Buffer.from(web3.utils.hexToBytes("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
+            ]);
+        }
+    }
+    return buyReplacementPattern;
+}
+
+function generateSellReplacementPatternForTraitBasedOrder(totalLeaf, isERC1155) {
+    let sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
+        "0x" +
+        "00000000" +                                                          // selector
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // from
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // to
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // token
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // tokenId
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleRoot
+        "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleProof Offset
+        "0000000000000000000000000000000000000000000000000000000000000000"    // merkleProof Length
+    ));
+
+    if (isERC1155 === true) {
+        sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
+            "0x" +
+            "00000000" +                                                          // selector
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // from
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // to
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // token
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // tokenId
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // amount
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleRoot
+            "0000000000000000000000000000000000000000000000000000000000000000" +  // merkleProof Offset
+            "0000000000000000000000000000000000000000000000000000000000000000"    // merkleProof Length
+        ));
+    }
+
+    if (totalLeaf>=2) {
+        const merkleProofLength = calculateProofLength(totalLeaf);
+        for (let idx = 0; idx < merkleProofLength; idx++) {
+            sellReplacementPattern = Buffer.concat([
+                sellReplacementPattern,
+                Buffer.from(web3.utils.hexToBytes("0x0000000000000000000000000000000000000000000000000000000000000000"))
+            ]);
+        }
     }
     return sellReplacementPattern;
 }
@@ -255,17 +407,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             [],// bytes32[] memory merkleProof
         );
 
-        let sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        let sellReplacementPattern = generateSellReplacementPatternForNormalOrder(false)
 
         let latestBlock = await web3.eth.getBlock("latest");
         let timestamp = latestBlock.timestamp;
@@ -443,17 +585,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await sleep(2 * 1000);
         await time.advanceBlock();
 
-        const buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        const buyReplacementPattern = generateBuyReplacementPatternForNormalOrder(false)
 
         const orderCalldataCanMatch = await niftyConnectExchangeInst.orderCalldataCanMatch(
             buyCalldata,
@@ -572,17 +704,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         timestamp = latestBlock.timestamp;
         expireTime = web3.utils.toBN(timestamp).add(web3.utils.toBN(3600)); // expire at one hour later
 
-        sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        sellReplacementPattern = generateSellReplacementPatternForNormalOrder(false)
 
         salt = "0x"+crypto.randomBytes(32).toString("hex")
         await niftyConnectExchangeInst.makeOrder_(
@@ -700,17 +822,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             [],// bytes32[] memory merkleProof
         );
 
-        let sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        let sellReplacementPattern = generateSellReplacementPatternForNormalOrder(false)
 
         let latestBlock = await web3.eth.getBlock("latest");
         let timestamp = latestBlock.timestamp;
@@ -759,17 +871,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await sleep(2 * 1000);
         await time.advanceBlock();
 
-        const buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        const buyReplacementPattern = generateBuyReplacementPatternForNormalOrder(false)
 
         await niftyConnectExchangeInst.setPendingGovernor(tempExchangeGovernor, {from: exchangeGovernor});
         await niftyConnectExchangeInst.acceptGovernance({from: tempExchangeGovernor});
@@ -940,18 +1042,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             [],// bytes32[] memory merkleProof
         );
 
-        let sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        let sellReplacementPattern = generateSellReplacementPatternForNormalOrder(true)
 
         let latestBlock = await web3.eth.getBlock("latest");
         let timestamp = latestBlock.timestamp;
@@ -998,18 +1089,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await sleep(2 * 1000);
         await time.advanceBlock();
 
-        const buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        const buyReplacementPattern = generateBuyReplacementPatternForNormalOrder(true)
 
         const ordersCanMatch_ = await niftyConnectExchangeInst.ordersCanMatch_(
             [   // address[16] addrs,
@@ -1121,17 +1201,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         timestamp = latestBlock.timestamp;
         expireTime = web3.utils.toBN(timestamp).add(web3.utils.toBN(3600)); // expire at one hour later
 
-        sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        sellReplacementPattern = generateSellReplacementPatternForNormalOrder(true)
 
         salt = "0x"+crypto.randomBytes(32).toString("hex")
         await niftyConnectExchangeInst.makeOrder_(
@@ -1245,18 +1315,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             [],// bytes32[] memory merkleProof
         );
 
-        let sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        let sellReplacementPattern = generateSellReplacementPatternForNormalOrder(true)
 
         let latestBlock = await web3.eth.getBlock("latest");
         let timestamp = latestBlock.timestamp;
@@ -1305,19 +1364,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await sleep(2 * 1000);
         await time.advanceBlock();
 
-        const buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
-
+        const buyReplacementPattern = generateBuyReplacementPatternForNormalOrder(true)
 
         const INVERSE_BASIS_POINT = await niftyConnectExchangeInst.INVERSE_BASIS_POINT();
 
@@ -1450,17 +1497,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             [],// bytes32[] memory merkleProof
         );
 
-        let buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        let buyReplacementPattern = generateBuyReplacementPatternForNormalOrder(false)
 
         let latestBlock = await web3.eth.getBlock("latest");
         let timestamp = latestBlock.timestamp;
@@ -1518,17 +1555,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             [],// bytes32[] memory merkleProof
         );
 
-        const sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        const sellReplacementPattern = generateSellReplacementPatternForNormalOrder(false)
 
         const INVERSE_BASIS_POINT = await niftyConnectExchangeInst.INVERSE_BASIS_POINT();
         const exchangeFeeRate = await niftyConnectExchangeInst.exchangeFeeRate();
@@ -1660,18 +1687,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             [],// bytes32[] memory merkleProof
         );
 
-        let buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        let buyReplacementPattern = generateBuyReplacementPatternForNormalOrder(true)
 
         let latestBlock = await web3.eth.getBlock("latest");
         let timestamp = latestBlock.timestamp;
@@ -1729,18 +1745,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             [],// bytes32[] memory merkleProof
         );
 
-        const sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        const sellReplacementPattern = generateSellReplacementPatternForNormalOrder(true)
 
         const INVERSE_BASIS_POINT = await niftyConnectExchangeInst.INVERSE_BASIS_POINT();
         const exchangeFeeRate = await niftyConnectExchangeInst.exchangeFeeRate();
@@ -1877,17 +1882,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             [],// bytes32[] memory merkleProof
         );
 
-        let sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        let sellReplacementPattern = generateSellReplacementPatternForNormalOrder(false)
 
         let latestBlock = await web3.eth.getBlock("latest");
         let timestamp = latestBlock.timestamp;
@@ -1943,17 +1938,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             [],// bytes32[] memory merkleProof
         );
 
-        const buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        const buyReplacementPattern = generateBuyReplacementPatternForNormalOrder(false)
 
         const INVERSE_BASIS_POINT = await niftyConnectExchangeInst.INVERSE_BASIS_POINT();
         const exchangeFeeRate = await niftyConnectExchangeInst.exchangeFeeRate();
@@ -2129,17 +2114,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             [],// bytes32[] memory merkleProof
         );
 
-        let buyReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +                                                          // selector
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +  // from
-            "0000000000000000000000000000000000000000000000000000000000000000" +  // to
-            "0000000000000000000000000000000000000000000000000000000000000000" +  // token
-            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +  // tokenId
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        let buyReplacementPattern = generateBuyReplacementPatternForCollectionBasedOrder(false)
 
         let latestBlock = await web3.eth.getBlock("latest");
         let timestamp = latestBlock.timestamp;
@@ -2232,17 +2207,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             [],// bytes32[] memory merkleProof
         );
 
-        const sellReplacementPattern = Buffer.from(web3.utils.hexToBytes(
-            "0x" +
-            "00000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000"
-        ));
+        const sellReplacementPattern = generateSellReplacementPatternForCollectionBasedOrder(false)
 
         await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
@@ -2417,7 +2382,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 "0x0000000000000000000000000000000000000000000000000000000000000000"
             ],          // merkleProof
         );
-        const buyReplacementPattern = generateBuyReplacementPattern(7);
+        const buyReplacementPattern = generateBuyReplacementPatternForTraitBasedOrder(7, false);
 
         let latestBlock = await web3.eth.getBlock("latest");
         let timestamp = latestBlock.timestamp;
@@ -2479,7 +2444,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             merkleProof,// bytes32[] memory merkleProof
         );
 
-        const sellReplacementPattern = generateSellReplacementPattern(7)
+        const sellReplacementPattern = generateSellReplacementPatternForTraitBasedOrder(7, false)
 
         await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
