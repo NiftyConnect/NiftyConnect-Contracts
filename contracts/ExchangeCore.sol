@@ -33,6 +33,8 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     // Note: the domain separator is derived and verified in the constructor. */
     bytes32 public constant DOMAIN_SEPARATOR = 0xf3d2ac68c052856a4466531fc8d3592e2a6dfa240a8bb1e088b036e6a98baffe;
 
+    uint256 public constant MAXIMUM_EXCHANGE_RATE = 500; //5%
+
     /* Token transfer proxy. */
     TokenTransferProxy public tokenTransferProxy;
 
@@ -191,6 +193,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     public
     onlyGovernor
     {
+        require(newExchangeFeeRate<=MAXIMUM_EXCHANGE_RATE, "invalid exchange fee rate");
         exchangeFeeRate = newExchangeFeeRate;
     }
 

@@ -2,7 +2,7 @@ const Web3 = require('web3');
 const crypto = require('crypto');
 const keccak256 = require('keccak256');
 const truffleAssert = require('truffle-assertions');
-const { expectRevert, time } = require('@openzeppelin/test-helpers');
+const { expectRevert, time, expectEvent } = require('@openzeppelin/test-helpers');
 const sleep = require("await-sleep");
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 
@@ -368,7 +368,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await testERC20Inst.approve(NiftyConnectTokenTransferProxy.address, web3.utils.toBN(1e18).mul(web3.utils.toBN(1e18)), {from: player0});
         await testERC20Inst.approve(NiftyConnectTokenTransferProxy.address, web3.utils.toBN(1e18).mul(web3.utils.toBN(1e18)), {from: player1});
     });
-    it('FixPrice List: Test ApproveOrder, AtomocSwap and CancelOrder on ERC721 with Native Coin', async () => {
+    it('FixPrice List: Test MakeOrder, TakeOrder and CancelOrder on ERC721 with Native Coin', async () => {
         const player0 = accounts[1];
         const player1 = accounts[2];
         const player0RelayerFeeRecipient = accounts[3];
@@ -389,17 +389,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             ERC721TransferSelector, // uint selector,
             player0, // address from,
             "0x0000000000000000000000000000000000000000", // address to,
-            TestERC721.address,// address nftAddress,
-            tokenIdIdx, // uint256 tokenId,
-            ERC721_AMOUNT,// uint256 amount,
-            "0x00", // bytes32 merkleRoot
-            [],// bytes32[] memory merkleProof
-        );
-
-        const buyCalldata = await niftyConnectExchangeInst.buildCallData(
-            ERC721TransferSelector, // uint selector,
-            "0x0000000000000000000000000000000000000000", // address from,
-            player1, // address to,
             TestERC721.address,// address nftAddress,
             tokenIdIdx, // uint256 tokenId,
             ERC721_AMOUNT,// uint256 amount,
@@ -447,7 +436,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         );
         assert.equal(isOrderParameterValid, true, "wrong order parameter check result");
 
-        await niftyConnectExchangeInst.makeOrder_(
+        const makerOrderTx = await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player0,                                            // maker
@@ -481,6 +470,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             ],                      // merkleData
             {from: player0}
         );
+
+        truffleAssert.eventEmitted(makerOrderTx, "OrderApprovedPartTwo",(ev) => {
+            return ev.calldata.toString() === sellCalldata.toString();
+        });
 
         const orderHash = await niftyConnectExchangeInst.hashToSign_(
             [
@@ -585,6 +578,16 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await sleep(2 * 1000);
         await time.advanceBlock();
 
+        const buyCalldata = await niftyConnectExchangeInst.buildCallData(
+            ERC721TransferSelector, // uint selector,
+            "0x0000000000000000000000000000000000000000", // address from,
+            player1, // address to,
+            TestERC721.address,// address nftAddress,
+            tokenIdIdx, // uint256 tokenId,
+            ERC721_AMOUNT,// uint256 amount,
+            "0x00", // bytes32 merkleRoot
+            [],// bytes32[] memory merkleProof
+        );
         const buyReplacementPattern = generateBuyReplacementPatternForNormalOrder(false)
 
         const orderCalldataCanMatch = await niftyConnectExchangeInst.orderCalldataCanMatch(
@@ -777,7 +780,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             {from: player1}
         );
     });
-    it('FixPrice List: Test ApproveOrder, AtomocSwap and CancelOrder on ERC721 with ERC20 Token', async () => {
+    it('FixPrice List: Test MakeOrder, TakeOrder and CancelOrder on ERC721 with ERC20 Token', async () => {
         const exchangeGovernor = accounts[0];
         const tempExchangeGovernor = accounts[10];
 
@@ -800,28 +803,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const initPlayer1ERC20Balance = await testERC20Inst.balanceOf(player1);
         assert.equal(initPlayer1ERC20Balance.toString(), web3.utils.toBN(1e18).mul(web3.utils.toBN(10000)).toString(), "wrong player1 ERC20 balance");
 
-        const sellCalldata = await niftyConnectExchangeInst.buildCallData(
-            ERC721SafeTransferSelector, // uint selector,
-            player0.toString(), // address from,
-            "0x0000000000000000000000000000000000000000", // address to,
-            TestERC721.address,// address nftAddress,
-            tokenIdIdx, // uint256 tokenId,
-            ERC721_AMOUNT,// uint256 amount,
-            "0x00", // bytes32 merkleRoot
-            [],// bytes32[] memory merkleProof
-        );
-
-        const buyCalldata = await niftyConnectExchangeInst.buildCallData(
-            ERC721SafeTransferSelector, // uint selector,
-            "0x0000000000000000000000000000000000000000", // address from,
-            player1, // address to,
-            TestERC721.address,// address nftAddress,
-            tokenIdIdx, // uint256 tokenId,
-            ERC721_AMOUNT,// uint256 amount,
-            "0x00", // bytes32 merkleRoot
-            [],// bytes32[] memory merkleProof
-        );
-
         let sellReplacementPattern = generateSellReplacementPatternForNormalOrder(false)
 
         let latestBlock = await web3.eth.getBlock("latest");
@@ -831,7 +812,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const exchangePrice = web3.utils.toBN(1e18)
 
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.makeOrder_(
+        const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player0,                                            // maker
@@ -866,10 +847,23 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             {from: player0}
         );
 
+        const orderApprovedPartTwoEvent = expectEvent.inLogs(makeOrdertx.logs, 'OrderApprovedPartTwo');
+        const sellCalldata = orderApprovedPartTwoEvent.args.calldata;
         // ---------------------------------------------------------------------------------------------------------
 
         await sleep(2 * 1000);
         await time.advanceBlock();
+
+        const buyCalldata = await niftyConnectExchangeInst.buildCallData(
+            ERC721SafeTransferSelector, // uint selector,
+            "0x0000000000000000000000000000000000000000", // address from,
+            player1, // address to,
+            TestERC721.address,// address nftAddress,
+            tokenIdIdx, // uint256 tokenId,
+            ERC721_AMOUNT,// uint256 amount,
+            "0x00", // bytes32 merkleRoot
+            [],// bytes32[] memory merkleProof
+        );
 
         const buyReplacementPattern = generateBuyReplacementPatternForNormalOrder(false)
 
@@ -1004,7 +998,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             toString(),
             "balance sum mismatch");
     });
-    it('FixPrice List: Test ApproveOrder, AtomocSwap and CancelOrder on ERC1155 with Native Coin', async () => {
+    it('FixPrice List: Test MakeOrder, TakeOrder and CancelOrder on ERC1155 with Native Coin', async () => {
         const player0 = accounts[1];
         const player1 = accounts[2];
         const player0RelayerFeeRecipient = accounts[3];
@@ -1019,17 +1013,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const balanceERC1155 = await testERC1155Inst.balanceOf(player0, tokenId)
 
         assert.equal(balanceERC1155.toString(), supply.toString(), "wrong supply");
-
-        const sellCalldata = await niftyConnectExchangeInst.buildCallData(
-            ERC1155SafeTransferSelector, // uint selector,
-            player0.toString(), // address from,
-            "0x0000000000000000000000000000000000000000", // address to,
-            TestERC1155.address,// address nftAddress,
-            tokenId, // uint256 tokenId,
-            supply,// uint256 amount,
-            "0x00", // bytes32 merkleRoot
-            [],// bytes32[] memory merkleProof
-        );
 
         const buyCalldata = await niftyConnectExchangeInst.buildCallData(
             ERC1155SafeTransferSelector, // uint selector,
@@ -1049,7 +1032,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let expireTime = web3.utils.toBN(timestamp).add(web3.utils.toBN(3600)); // expire at one hour later
         let exchangePrice = web3.utils.toBN(1e18);
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.makeOrder_(
+        const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player0,                                            // maker
@@ -1083,6 +1066,9 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             ],                      // merkleData
             {from: player0}
         );
+
+        const orderApprovedPartTwoEvent = expectEvent.inLogs(makeOrdertx.logs, 'OrderApprovedPartTwo');
+        const sellCalldata = orderApprovedPartTwoEvent.args.calldata;
 
         // ---------------------------------------------------------------------------------------------------------
 
@@ -1274,7 +1260,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             {from: player1}
         );
     });
-    it('FixPrice List: Test ApproveOrder, AtomocSwap and CancelOrder on ERC1155 with ERC20 Token', async () => {
+    it('FixPrice List: Test MakeOrder, TakeOrder and CancelOrder on ERC1155 with ERC20 Token', async () => {
         const player0 = accounts[1];
         const player1 = accounts[2];
         const player0RelayerFeeRecipient = accounts[3];
@@ -1292,17 +1278,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         assert.equal(balanceERC1155.toString(), supply.toString(), "wrong supply");
 
         await testERC20Inst.mint(player1, web3.utils.toBN(1e18).mul(web3.utils.toBN(10000)), {from: player1})
-
-        const sellCalldata = await niftyConnectExchangeInst.buildCallData(
-            ERC1155SafeTransferSelector, // uint selector,
-            player0.toString(), // address from,
-            "0x0000000000000000000000000000000000000000", // address to,
-            TestERC1155.address,// address nftAddress,
-            tokenId, // uint256 tokenId,
-            supply,// uint256 amount,
-            "0x00", // bytes32 merkleRoot
-            [],// bytes32[] memory merkleProof
-        );
 
         const buyCalldata = await niftyConnectExchangeInst.buildCallData(
             ERC1155SafeTransferSelector, // uint selector,
@@ -1324,7 +1299,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const exchangePrice = web3.utils.toBN(1e18)
 
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.makeOrder_(
+        const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player0,                                            // maker
@@ -1358,6 +1333,9 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             ],                      // merkleData
             {from: player0}
         );
+
+        const orderApprovedPartTwoEvent = expectEvent.inLogs(makeOrdertx.logs, 'OrderApprovedPartTwo');
+        const sellCalldata = orderApprovedPartTwoEvent.args.calldata;
 
         // ---------------------------------------------------------------------------------------------------------
 
@@ -1486,17 +1464,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const tokenIdIdx = await testERC721Inst.tokenIdIdx();
         await testERC721Inst.mint(player0, {from: player0});
 
-        const buyCalldata = await niftyConnectExchangeInst.buildCallData(
-            ERC721TransferSelector, // uint selector,
-            "0x0000000000000000000000000000000000000000", // address from,
-            player1, // address to,
-            TestERC721.address,// address nftAddress,
-            tokenIdIdx, // uint256 tokenId,
-            ERC721_AMOUNT,// uint256 amount,
-            "0x00", // bytes32 merkleRoot
-            [],// bytes32[] memory merkleProof
-        );
-
         let buyReplacementPattern = generateBuyReplacementPatternForNormalOrder(false)
 
         let latestBlock = await web3.eth.getBlock("latest");
@@ -1504,7 +1471,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let expireTime = web3.utils.toBN(timestamp).add(web3.utils.toBN(3600)); // expire at one hour later
         let exchangePrice = web3.utils.toBN(1e18);
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.makeOrder_(
+        const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player1,                                            // maker
@@ -1539,6 +1506,8 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             {from: player1}
         );
 
+        const orderApprovedPartTwoEvent = expectEvent.inLogs(makeOrdertx.logs, 'OrderApprovedPartTwo');
+        const buyCalldata = orderApprovedPartTwoEvent.args.calldata;
         // ---------------------------------------------------------------------------------------------------------
 
         await sleep(2 * 1000);
@@ -1676,17 +1645,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const supply = web3.utils.toBN(1);
         await testERC1155Inst.mint(tokenId, supply, {from: player0});
 
-        const buyCalldata = await niftyConnectExchangeInst.buildCallData(
-            ERC1155SafeTransferSelector, // uint selector,
-            "0x0000000000000000000000000000000000000000", // address from,
-            player1, // address to,
-            TestERC1155.address,// address nftAddress,
-            tokenId, // uint256 tokenId,
-            supply,// uint256 amount,
-            "0x00", // bytes32 merkleRoot
-            [],// bytes32[] memory merkleProof
-        );
-
         let buyReplacementPattern = generateBuyReplacementPatternForNormalOrder(true)
 
         let latestBlock = await web3.eth.getBlock("latest");
@@ -1694,7 +1652,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let expireTime = web3.utils.toBN(timestamp).add(web3.utils.toBN(3600)); // expire at one hour later
         let exchangePrice = web3.utils.toBN(1e18);
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.makeOrder_(
+        const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player1,                                            // maker
@@ -1728,6 +1686,8 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             ],                      // merkleData
             {from: player1}
         );
+        const orderApprovedPartTwoEvent = expectEvent.inLogs(makeOrdertx.logs, 'OrderApprovedPartTwo');
+        const buyCalldata = orderApprovedPartTwoEvent.args.calldata;
 
         // ---------------------------------------------------------------------------------------------------------
 
@@ -1871,17 +1831,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         assert.equal(ownerAddr.toString(), player0.toString(), "wrong owner");
 
-        const sellCalldata = await niftyConnectExchangeInst.buildCallData(
-            ERC721TransferSelector, // uint selector,
-            player0, // address from,
-            "0x0000000000000000000000000000000000000000", // address to,
-            TestERC721.address,// address nftAddress,
-            tokenIdIdx, // uint256 tokenId,
-            ERC721_AMOUNT,// uint256 amount,
-            "0x00", // bytes32 merkleRoot
-            [],// bytes32[] memory merkleProof
-        );
-
         let sellReplacementPattern = generateSellReplacementPatternForNormalOrder(false)
 
         let latestBlock = await web3.eth.getBlock("latest");
@@ -1890,7 +1839,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         let salt = "0x"+crypto.randomBytes(32).toString("hex");
 
-        await niftyConnectExchangeInst.makeOrder_(
+        const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player0,                                            // maker
@@ -1924,6 +1873,8 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             ],                      // merkleData
             {from: player0}
         );
+        const orderApprovedPartTwoEvent = expectEvent.inLogs(makeOrdertx.logs, 'OrderApprovedPartTwo');
+        const sellCalldata = orderApprovedPartTwoEvent.args.calldata;
 
         // ---------------------------------------------------------------------------------------------------------
 
@@ -2103,17 +2054,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         const emptyTokenId = web3.utils.toBN(0);
 
-        const buyCalldata = await niftyConnectExchangeInst.buildCallData(
-            ERC721TransferSelector, // uint selector,
-            "0x0000000000000000000000000000000000000000", // address from,
-            player1, // address to,
-            TestERC721.address,// address nftAddress,
-            emptyTokenId, // uint256 tokenId,
-            ERC721_AMOUNT,// uint256 amount,
-            "0x00", // bytes32 merkleRoot
-            [],// bytes32[] memory merkleProof
-        );
-
         let buyReplacementPattern = generateBuyReplacementPatternForCollectionBasedOrder(false)
 
         let latestBlock = await web3.eth.getBlock("latest");
@@ -2122,7 +2062,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let exchangePrice = web3.utils.toBN(1e18);
         let salt1 = "0x"+crypto.randomBytes(32).toString("hex")
         let salt2 = "0x"+crypto.randomBytes(32).toString("hex")
-        await niftyConnectExchangeInst.makeOrder_(
+        let makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player1,                                            // maker
@@ -2156,7 +2096,11 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             ],                      // merkleData
             {from: player1}
         );
-        await niftyConnectExchangeInst.makeOrder_(
+
+        const orderApprovedPartTwoEvent = expectEvent.inLogs(makeOrdertx.logs, 'OrderApprovedPartTwo');
+        const buyCalldata = orderApprovedPartTwoEvent.args.calldata;
+
+        makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player1,                                            // maker
@@ -2191,6 +2135,9 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             {from: player1}
         );
 
+        const orderApprovedPartTwoEvent1 = expectEvent.inLogs(makeOrdertx.logs, 'OrderApprovedPartTwo');
+        const buyCalldata1 = orderApprovedPartTwoEvent1.args.calldata;
+        assert.equal(buyCalldata.toString(), buyCalldata1.toString(), "order calldata mismatch");
         // ---------------------------------------------------------------------------------------------------------
 
         await sleep(2 * 1000);
@@ -2350,10 +2297,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const tokenIdIdx7 = await testERC721Inst.tokenIdIdx();
         await testERC721Inst.mint(player0, {from: player0});
 
-        const proof1 = await merkleValidatorInst.calculateProof(tokenIdIdx1, tokenIdIdx2);
-        const proof2 = await merkleValidatorInst.calculateProof(tokenIdIdx3, tokenIdIdx4);
-        const proof3 = await merkleValidatorInst.calculateProof(proof1, proof2);
-
         const {merkleRoot, merkleProof} = generateMerkleProofAndRoot(tokenIdIdx1,
             [
                 tokenIdIdx1,
@@ -2368,20 +2311,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         const emptyTokenId = web3.utils.toBN(0);
 
-        const buyCalldata = await niftyConnectExchangeInst.buildCallData(
-            ERC721TransferSelector, // uint selector,
-            "0x0000000000000000000000000000000000000000", // address from,
-            player1, // address to,
-            TestERC721.address,// address nftAddress,
-            emptyTokenId, // uint256 tokenId,
-            ERC721_AMOUNT,// uint256 amount,
-            merkleRoot, // bytes32 merkleRoot
-            [
-                "0x0000000000000000000000000000000000000000000000000000000000000000",
-                "0x0000000000000000000000000000000000000000000000000000000000000000",
-                "0x0000000000000000000000000000000000000000000000000000000000000000"
-            ],          // merkleProof
-        );
         const buyReplacementPattern = generateBuyReplacementPatternForTraitBasedOrder(7, false);
 
         let latestBlock = await web3.eth.getBlock("latest");
@@ -2389,7 +2318,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let expireTime = web3.utils.toBN(timestamp).add(web3.utils.toBN(3600)); // expire at one hour later
         let exchangePrice = web3.utils.toBN(1e18);
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
-        const approveOrderTx = await niftyConnectExchangeInst.makeOrder_(
+        const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
                 NiftyConnectExchange.address,                          // exchange
                 player1,                                            // maker
@@ -2424,9 +2353,8 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             {from: player1}
         );
 
-        truffleAssert.eventEmitted(approveOrderTx, "OrderApprovedPartTwo",(ev) => {
-            return ev.calldata.toString() === buyCalldata.toString();
-        });
+        const orderApprovedPartTwoEvent = expectEvent.inLogs(makeOrdertx.logs, 'OrderApprovedPartTwo');
+        const buyCalldata = orderApprovedPartTwoEvent.args.calldata;
 
         // ---------------------------------------------------------------------------------------------------------
 
