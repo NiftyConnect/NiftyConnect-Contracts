@@ -1,7 +1,8 @@
 pragma solidity 0.4.26;
 
-import "../SafeMath.sol";
 import "./IERC1155.sol";
+
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 // A sample implementation of core ERC1155 function.
 contract ERC1155 is IERC1155 {

@@ -406,11 +406,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         const isOrderParameterValid = await niftyConnectExchangeInst.validateOrderParameters_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 "0x0000000000000000000000000000000000000000",       // paymentToken
@@ -438,11 +437,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         const makerOrderTx = await niftyConnectExchangeInst.makeOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 "0x0000000000000000000000000000000000000000",       // paymentToken
@@ -477,11 +475,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         const orderHash = await niftyConnectExchangeInst.hashToSign_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 "0x0000000000000000000000000000000000000000",       // paymentToken
@@ -511,11 +508,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         const isOrderValid = await niftyConnectExchangeInst.validateOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 "0x0000000000000000000000000000000000000000",       // paymentToken
@@ -543,11 +539,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         const currentPrice = await niftyConnectExchangeInst.calculateCurrentPrice_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 "0x0000000000000000000000000000000000000000",       // paymentToken
@@ -600,7 +595,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const matchPrice = await niftyConnectExchangeInst.calculateMatchPrice_(
             [   // address[16] addrs,
                 //buy
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 player0,                                            // taker
                 "0x0000000000000000000000000000000000000000",       // makerRelayerFeeRecipient
@@ -610,7 +605,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 "0x0000000000000000000000000000000000000000",       // paymentToken
 
                 //sell
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
@@ -712,11 +707,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         salt = "0x"+crypto.randomBytes(32).toString("hex")
         await niftyConnectExchangeInst.makeOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 "0x0000000000000000000000000000000000000000",       // paymentToken
@@ -750,11 +744,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         await niftyConnectExchangeInst.cancelOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 "0x0000000000000000000000000000000000000000",       // paymentToken
@@ -814,11 +807,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
         const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 TestERC20.address,                                  // paymentToken
@@ -914,7 +906,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 player0,                                            // taker
                 "0x0000000000000000000000000000000000000000",       // makerRelayerFeeRecipient
@@ -924,7 +916,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 TestERC20.address,                                  // paymentToken
 
                 //sell
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
@@ -1034,11 +1026,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
         const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC1155.address,                                // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 "0x0000000000000000000000000000000000000000",       // paymentToken
@@ -1080,7 +1071,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const ordersCanMatch_ = await niftyConnectExchangeInst.ordersCanMatch_(
             [   // address[16] addrs,
                 //buy
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 player0,                                            // taker
                 "0x0000000000000000000000000000000000000000",       // makerRelayerFeeRecipient
@@ -1090,7 +1081,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 "0x0000000000000000000000000000000000000000",       // paymentToken
 
                 //sell
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
@@ -1132,7 +1123,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 player0,                                            // taker
                 "0x0000000000000000000000000000000000000000",       // makerRelayerFeeRecipient
@@ -1142,7 +1133,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 "0x0000000000000000000000000000000000000000",       // paymentToken
 
                 //sell
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
@@ -1192,11 +1183,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         salt = "0x"+crypto.randomBytes(32).toString("hex")
         await niftyConnectExchangeInst.makeOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC1155.address,                                // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 "0x0000000000000000000000000000000000000000",       // paymentToken
@@ -1230,11 +1220,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         await niftyConnectExchangeInst.cancelOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC1155.address,                                // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 "0x0000000000000000000000000000000000000000",       // paymentToken
@@ -1301,11 +1290,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
         const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC1155.address,                                // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 TestERC20.address,                                  // paymentToken
@@ -1367,7 +1355,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 player0,                                            // taker
                 "0x0000000000000000000000000000000000000000",       // makerRelayerFeeRecipient
@@ -1377,7 +1365,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 TestERC20.address,                                  // paymentToken
 
                 //sell
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
@@ -1473,11 +1461,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
         const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 TestERC20.address,                                  // paymentToken
@@ -1547,7 +1534,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
@@ -1557,7 +1544,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 TestERC20.address,                                  // paymentToken
 
                 //sell
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 player1,                                            // taker
                 "0x0000000000000000000000000000000000000000",       // makerRelayerFeeRecipient
@@ -1654,11 +1641,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
         const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC1155.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 TestERC20.address,                                  // paymentToken
@@ -1728,7 +1714,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
@@ -1738,7 +1724,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 TestERC20.address,                                  // paymentToken
 
                 //sell
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 player1,                                            // taker
                 "0x0000000000000000000000000000000000000000",       // makerRelayerFeeRecipient
@@ -1841,11 +1827,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 TestERC20.address,                                  // paymentToken
@@ -1914,11 +1899,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         let currentPrice = await niftyConnectExchangeInst.calculateCurrentPrice_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 TestERC20.address,                                  // paymentToken
@@ -1946,7 +1930,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const atomicMatchTx = await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 "0x0000000000000000000000000000000000000000",       // makerRelayerFeeRecipient
@@ -1956,7 +1940,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 TestERC20.address,                                  // paymentToken
 
                 //sell
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player0RelayerFeeRecipient,                         // makerRelayerFeeRecipient
@@ -2064,11 +2048,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let salt2 = "0x"+crypto.randomBytes(32).toString("hex")
         let makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 TestERC20.address,                                  // paymentToken
@@ -2102,11 +2085,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 TestERC20.address,                                  // paymentToken
@@ -2159,7 +2141,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
@@ -2169,7 +2151,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 TestERC20.address,                                  // paymentToken
 
                 //sell
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 player1,                                            // taker
                 "0x0000000000000000000000000000000000000000",       // makerRelayerFeeRecipient
@@ -2222,7 +2204,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
@@ -2232,7 +2214,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 TestERC20.address,                                  // paymentToken
 
                 //sell
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 player1,                                            // taker
                 "0x0000000000000000000000000000000000000000",       // makerRelayerFeeRecipient
@@ -2320,11 +2302,10 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         let salt = "0x"+crypto.randomBytes(32).toString("hex")
         const makeOrdertx = await niftyConnectExchangeInst.makeOrder_(
             [
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 TestERC20.address,                                  // paymentToken
@@ -2377,7 +2358,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
@@ -2387,7 +2368,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 TestERC20.address,                                  // paymentToken
 
                 //sell
-                NiftyConnectExchange.address,                          // exchange
+                NiftyConnectExchange.address,                       // exchange
                 player0,                                            // maker
                 player1,                                            // taker
                 "0x0000000000000000000000000000000000000000",       // makerRelayerFeeRecipient
@@ -2437,7 +2418,6 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
                 player1,                                            // maker
                 "0x0000000000000000000000000000000000000000",       // taker
                 player1RelayerFeeRecipient,                         // makerRelayerFeeRecipient
-                "0x0000000000000000000000000000000000000000",       // takerRelayerFeeRecipient
                 TestERC721.address,                                 // nftAddress
                 "0x0000000000000000000000000000000000000000",       // staticTarget
                 TestERC20.address,                                  // paymentToken

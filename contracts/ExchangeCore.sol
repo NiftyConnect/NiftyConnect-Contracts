@@ -559,12 +559,14 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
                 transferTokens(sell.paymentToken, sell.maker, sell.makerRelayerFeeRecipient, makerRelayerFee);
             }
 
-            uint takerRelayerFee = SafeMath.div(SafeMath.mul(takerRelayerFeeShare, exchangeFee), INVERSE_BASIS_POINT);
-            if (sell.paymentToken == address(0)) {
-                receiveAmount = SafeMath.sub(receiveAmount, takerRelayerFee);
-                buy.takerRelayerFeeRecipient.transfer(takerRelayerFee);
-            } else {
-                transferTokens(sell.paymentToken, sell.maker, buy.takerRelayerFeeRecipient, takerRelayerFee);
+            if (buy.takerRelayerFeeRecipient != address(0)) {
+                uint takerRelayerFee = SafeMath.div(SafeMath.mul(takerRelayerFeeShare, exchangeFee), INVERSE_BASIS_POINT);
+                if (sell.paymentToken == address(0)) {
+                    receiveAmount = SafeMath.sub(receiveAmount, takerRelayerFee);
+                    buy.takerRelayerFeeRecipient.transfer(takerRelayerFee);
+                } else {
+                    transferTokens(sell.paymentToken, sell.maker, buy.takerRelayerFeeRecipient, takerRelayerFee);
+                }
             }
 
             uint protocolFee = SafeMath.div(SafeMath.mul(protocolFeeShare, exchangeFee), INVERSE_BASIS_POINT);
@@ -583,8 +585,10 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
             makerRelayerFee = SafeMath.div(SafeMath.mul(makerRelayerFeeShare, exchangeFee), INVERSE_BASIS_POINT);
             transferTokens(sell.paymentToken, sell.maker, buy.makerRelayerFeeRecipient, makerRelayerFee);
 
-            takerRelayerFee = SafeMath.div(SafeMath.mul(takerRelayerFeeShare, exchangeFee), INVERSE_BASIS_POINT);
-            transferTokens(sell.paymentToken, sell.maker, sell.takerRelayerFeeRecipient, takerRelayerFee);
+            if (sell.takerRelayerFeeRecipient != address(0)) {
+                takerRelayerFee = SafeMath.div(SafeMath.mul(takerRelayerFeeShare, exchangeFee), INVERSE_BASIS_POINT);
+                transferTokens(sell.paymentToken, sell.maker, sell.takerRelayerFeeRecipient, takerRelayerFee);
+            }
 
             protocolFee = SafeMath.div(SafeMath.mul(protocolFeeShare, exchangeFee), INVERSE_BASIS_POINT);
             transferTokens(sell.paymentToken, sell.maker, protocolFeeRecipient, protocolFee);
