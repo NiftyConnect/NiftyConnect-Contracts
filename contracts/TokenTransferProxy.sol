@@ -1,8 +1,10 @@
 pragma solidity 0.4.26;
 
-import "./ERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 
 contract TokenTransferProxy {
+    using SafeERC20 for IERC20;
 
     /* Whether initialized. */
     bool public initialized = false;
@@ -20,7 +22,7 @@ contract TokenTransferProxy {
      * Call ERC20 `transferFrom`
      *
      * @dev Authenticated contract only
-     * @param token ERC20 token address
+     * @param token IERC20 token address
      * @param from From address
      * @param to To address
      * @param amount Transfer amount
@@ -30,7 +32,8 @@ contract TokenTransferProxy {
     returns (bool)
     {
         require(msg.sender==exchangeAddress, "not authorized");
-        return ERC20(token).transferFrom(from, to, amount);
+        IERC20(token).safeTransferFrom(from, to, amount);
+        return true;
     }
 
 }

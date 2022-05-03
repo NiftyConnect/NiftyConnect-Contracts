@@ -1,8 +1,9 @@
 pragma solidity 0.4.26;
 
 import "./Ownable.sol";
-import "./SafeMath.sol";
 import "./IRoyaltyRegisterHub.sol";
+
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 interface IOwnable {
     function owner() external view returns (address);

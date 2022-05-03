@@ -1,6 +1,5 @@
 pragma solidity 0.4.26;
 
-import "./SafeMath.sol";
 import "./ExchangeCore.sol";
 import "./SaleKindInterface.sol";
 import "./TokenTransferProxy.sol";
@@ -75,7 +74,6 @@ contract NiftyConnectExchange is ExchangeCore {
             merkleProofLength--;
         }
         merkleProof = new bytes32[](merkleProofLength);
-        require(merkleRoot!=bytes32(0x00), "invalid merkleRoot");
         return buildCallData(uints[5],from,to,nftAddress,uints[6],uints[7],merkleRoot,merkleProof);
     }
 
@@ -110,7 +108,7 @@ contract NiftyConnectExchange is ExchangeCore {
     {
         bytes memory orderCallData = buildCallDataInternal(addrs[8],addrs[9],addrs[5],uints,merkleRoot);
         return hashToSign(
-            Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]),
+            Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, IERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]),
             nonces[addrs[1]]
         );
     }
@@ -127,7 +125,7 @@ contract NiftyConnectExchange is ExchangeCore {
     public
     returns (bool) {
         bytes memory orderCallData = buildCallDataInternal(addrs[8],addrs[9],addrs[5],uints,merkleRoot);
-        Order memory order = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
+        Order memory order = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, IERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
         return validateOrderParameters(
             order
         );
@@ -146,7 +144,7 @@ contract NiftyConnectExchange is ExchangeCore {
     returns (bool)
     {
         bytes memory orderCallData = buildCallDataInternal(addrs[8],addrs[9],addrs[5],uints,merkleRoot);
-        Order memory order = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
+        Order memory order = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, IERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
         return validateOrder(
             hashToSign(order, nonces[order.maker]),
             order
@@ -164,7 +162,7 @@ contract NiftyConnectExchange is ExchangeCore {
     public
     {
         bytes memory orderCallData = buildCallDataInternal(addrs[8],addrs[9],addrs[5],uints,merkleData[0]);
-        Order memory order = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
+        Order memory order = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, IERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
         return makeOrder(order, merkleData[1]);
     }
 
@@ -179,7 +177,7 @@ contract NiftyConnectExchange is ExchangeCore {
     public
     {
         bytes memory orderCallData = buildCallDataInternal(addrs[8],addrs[9],addrs[5],uints,merkleRoot);
-        Order memory order = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
+        Order memory order = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, IERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
         return cancelOrder(
             order,
             nonces[order.maker]
@@ -200,7 +198,7 @@ contract NiftyConnectExchange is ExchangeCore {
     {
         bytes memory orderCallData = buildCallDataInternal(addrs[8],addrs[9],addrs[5],uints,merkleRoot);
         return calculateCurrentPrice(
-            Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4])
+            Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], side, saleKind, addrs[5], uints[6], orderCallData, replacementPattern, addrs[6], staticExtradata, IERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4])
         );
     }
 
@@ -218,8 +216,8 @@ contract NiftyConnectExchange is ExchangeCore {
     view
     returns (bool)
     {
-        Order memory buy = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], SaleKindInterface.Side(sidesKinds[0]), SaleKindInterface.SaleKind(sidesKinds[1]), addrs[5], uints[5], calldataBuy, replacementPatternBuy, addrs[6], staticExtradataBuy, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
-        Order memory sell = Order(addrs[8], addrs[9], addrs[10], addrs[11], addrs[12], SaleKindInterface.Side(sidesKinds[2]), SaleKindInterface.SaleKind(sidesKinds[3]), addrs[13], uints[11], calldataSell, replacementPatternSell, addrs[14], staticExtradataSell, ERC20(addrs[15]), uints[6], uints[7], uints[8], uints[9], uints[10]);
+        Order memory buy = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], SaleKindInterface.Side(sidesKinds[0]), SaleKindInterface.SaleKind(sidesKinds[1]), addrs[5], uints[5], calldataBuy, replacementPatternBuy, addrs[6], staticExtradataBuy, IERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
+        Order memory sell = Order(addrs[8], addrs[9], addrs[10], addrs[11], addrs[12], SaleKindInterface.Side(sidesKinds[2]), SaleKindInterface.SaleKind(sidesKinds[3]), addrs[13], uints[11], calldataSell, replacementPatternSell, addrs[14], staticExtradataSell, IERC20(addrs[15]), uints[6], uints[7], uints[8], uints[9], uints[10]);
         return ordersCanMatch(
             buy,
             sell
@@ -254,8 +252,8 @@ contract NiftyConnectExchange is ExchangeCore {
     view
     returns (uint)
     {
-        Order memory buy = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], SaleKindInterface.Side(sidesKinds[0]), SaleKindInterface.SaleKind(sidesKinds[1]), addrs[5], uints[5], calldataBuy, replacementPatternBuy, addrs[6], staticExtradataBuy, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
-        Order memory sell = Order(addrs[8], addrs[9], addrs[10], addrs[11], addrs[12], SaleKindInterface.Side(sidesKinds[2]), SaleKindInterface.SaleKind(sidesKinds[3]), addrs[13], uints[11], calldataSell, replacementPatternSell, addrs[14], staticExtradataSell, ERC20(addrs[15]), uints[6], uints[7], uints[8], uints[9], uints[10]);
+        Order memory buy = Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], SaleKindInterface.Side(sidesKinds[0]), SaleKindInterface.SaleKind(sidesKinds[1]), addrs[5], uints[5], calldataBuy, replacementPatternBuy, addrs[6], staticExtradataBuy, IERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]);
+        Order memory sell = Order(addrs[8], addrs[9], addrs[10], addrs[11], addrs[12], SaleKindInterface.Side(sidesKinds[2]), SaleKindInterface.SaleKind(sidesKinds[3]), addrs[13], uints[11], calldataSell, replacementPatternSell, addrs[14], staticExtradataSell, IERC20(addrs[15]), uints[6], uints[7], uints[8], uints[9], uints[10]);
         return calculateMatchPrice(
             buy,
             sell
@@ -278,8 +276,8 @@ contract NiftyConnectExchange is ExchangeCore {
     {
 
         return takeOrder(
-            Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], SaleKindInterface.Side(sidesKinds[0]), SaleKindInterface.SaleKind(sidesKinds[1]), addrs[5], uints[5], calldataBuy, replacementPatternBuy, addrs[6], staticExtradataBuy, ERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]),
-            Order(addrs[8], addrs[9], addrs[10], addrs[11], addrs[12], SaleKindInterface.Side(sidesKinds[2]), SaleKindInterface.SaleKind(sidesKinds[3]), addrs[13], uints[11], calldataSell, replacementPatternSell, addrs[14], staticExtradataSell, ERC20(addrs[15]), uints[6], uints[7], uints[8], uints[9], uints[10]),
+            Order(addrs[0], addrs[1], addrs[2], addrs[3], addrs[4], SaleKindInterface.Side(sidesKinds[0]), SaleKindInterface.SaleKind(sidesKinds[1]), addrs[5], uints[5], calldataBuy, replacementPatternBuy, addrs[6], staticExtradataBuy, IERC20(addrs[7]), uints[0], uints[1], uints[2], uints[3], uints[4]),
+            Order(addrs[8], addrs[9], addrs[10], addrs[11], addrs[12], SaleKindInterface.Side(sidesKinds[2]), SaleKindInterface.SaleKind(sidesKinds[3]), addrs[13], uints[11], calldataSell, replacementPatternSell, addrs[14], staticExtradataSell, IERC20(addrs[15]), uints[6], uints[7], uints[8], uints[9], uints[10]),
             rssMetadata
         );
     }

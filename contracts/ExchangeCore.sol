@@ -1,9 +1,7 @@
 pragma solidity 0.4.26;
 
 import "./ArrayUtils.sol";
-import "./SafeMath.sol";
 import "./TokenTransferProxy.sol";
-import "./ERC20.sol";
 import "./IERC2981.sol";
 import "./IRoyaltyRegisterHub.sol";
 import "./ReentrancyGuarded.sol";
@@ -276,7 +274,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     returns (bytes32 hash)
     {
         /* Unfortunately abi.encodePacked doesn't work here, stack size constraints. */
-        uint size = 800;
+        uint size = 672;
         bytes memory array = new bytes(size);
         uint index;
         assembly {
@@ -422,7 +420,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
         bytes32 hash = hashToSign(order, nonces[order.maker]);
 
         /* Assert order has not already been approved. */
-        require(_approvedOrdersByNonce[hash] == 0);
+        require(_approvedOrdersByNonce[hash] == 0, "duplicated order hash");
 
         /* EFFECTS */
 
@@ -501,7 +499,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     }
 
     /**
-     * @dev Execute all ERC20 token / Ether transfers associated with an order match (fees and buyer => seller transfer)
+     * @dev Execute all IERC20 token / Ether transfers associated with an order match (fees and buyer => seller transfer)
      * @param buy Buy-side order
      * @param sell Sell-side order
      */

@@ -1,6 +1,6 @@
 pragma solidity 0.4.26;
 
-import "./SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 library SaleKindInterface {
 
