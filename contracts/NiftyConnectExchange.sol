@@ -163,6 +163,7 @@ contract NiftyConnectExchange is ExchangeCore {
     {
         bytes memory orderCallData = buildCallDataInternal(addrs[7],addrs[8],addrs[4],uints,merkleData[0]);
         require(addrs[3]!=address(0x00), "makerRelayerFeeRecipient must not be zero");
+        require(orderCallData.length==replacementPattern.length, "replacement pattern length mismatch");
         Order memory order = Order(addrs[0], addrs[1], addrs[2], addrs[3], address(0x00), side, saleKind, addrs[4], uints[6], orderCallData, replacementPattern, addrs[5], staticExtradata, IERC20(addrs[6]), uints[0], uints[1], uints[2], uints[3], uints[4]);
         return makeOrder(order, merkleData[1]);
     }
