@@ -546,7 +546,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
         }
 
         /* Determine maker/taker and charge fees accordingly. */
-        if (sell.makerRelayerFeeRecipient != address(0)) {
+        if (sell.makerRelayerFeeRecipient != address(0) && exchangeFee != 0) {
             /* Sell-side order is maker. */
 
             /* Maker fees are deducted from the token amount that the maker receives. Taker fees are extra tokens that must be paid by the taker. */
@@ -576,22 +576,24 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
             } else {
                 transferTokens(sell.paymentToken, sell.maker, protocolFeeRecipient, protocolFee);
             }
-        } else {
+        } else if (sell.makerRelayerFeeRecipient == address(0)){
             /* Buy-side order is maker. */
 
             /* The Exchange does not escrow Ether, so direct Ether can only be used to with sell-side maker / buy-side taker orders. */
             require(sell.paymentToken != address(0));
 
-            makerRelayerFee = SafeMath.div(SafeMath.mul(makerRelayerFeeShare, exchangeFee), INVERSE_BASIS_POINT);
-            transferTokens(sell.paymentToken, sell.maker, buy.makerRelayerFeeRecipient, makerRelayerFee);
+            if (exchangeFee != 0) {
+                makerRelayerFee = SafeMath.div(SafeMath.mul(makerRelayerFeeShare, exchangeFee), INVERSE_BASIS_POINT);
+                transferTokens(sell.paymentToken, sell.maker, buy.makerRelayerFeeRecipient, makerRelayerFee);
 
-            if (sell.takerRelayerFeeRecipient != address(0)) {
-                takerRelayerFee = SafeMath.div(SafeMath.mul(takerRelayerFeeShare, exchangeFee), INVERSE_BASIS_POINT);
-                transferTokens(sell.paymentToken, sell.maker, sell.takerRelayerFeeRecipient, takerRelayerFee);
+                if (sell.takerRelayerFeeRecipient != address(0)) {
+                    takerRelayerFee = SafeMath.div(SafeMath.mul(takerRelayerFeeShare, exchangeFee), INVERSE_BASIS_POINT);
+                    transferTokens(sell.paymentToken, sell.maker, sell.takerRelayerFeeRecipient, takerRelayerFee);
+                }
+
+                protocolFee = SafeMath.div(SafeMath.mul(protocolFeeShare, exchangeFee), INVERSE_BASIS_POINT);
+                transferTokens(sell.paymentToken, sell.maker, protocolFeeRecipient, protocolFee);
             }
-
-            protocolFee = SafeMath.div(SafeMath.mul(protocolFeeShare, exchangeFee), INVERSE_BASIS_POINT);
-            transferTokens(sell.paymentToken, sell.maker, protocolFeeRecipient, protocolFee);
         }
 
         if (sell.paymentToken == address(0)) {
