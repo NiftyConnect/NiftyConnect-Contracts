@@ -644,7 +644,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         assert.equal(matchPrice.toString(), exchangePrice.toString(), "exchange price mismatch");
 
-        await niftyConnectExchangeInst.takeOrder_(
+        const takeOrderTx = await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
                 NiftyConnectExchange.address,                       // exchange
@@ -695,6 +695,14 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             "0x00",// bytes32 rssMetadata
             {from: player1, value: web3.utils.toBN(1e18)}
         );
+
+        truffleAssert.eventEmitted(takeOrderTx, "OrdersMatched",(ev) => {
+            return ev.maker.toString() === player0.toString() &&
+                ev.maker.toString() === player0.toString() &&
+                ev.taker.toString() === player1.toString() &&
+                ev.makerRelayerFeeRecipient.toString() === player0RelayerFeeRecipient.toString() &&
+                ev.takerRelayerFeeRecipient.toString() === player1RelayerFeeRecipient.toString();
+        });
 
         // ---------------------------------------------------------------------------------------------------------
 
@@ -1927,7 +1935,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             "0x00",                 // merkleRoot
         );
 
-        const atomicMatchTx = await niftyConnectExchangeInst.takeOrder_(
+        const takeOrderTx = await niftyConnectExchangeInst.takeOrder_(
             [   // address[16] addrs,
                 //buy
                 NiftyConnectExchange.address,                       // exchange
@@ -1979,7 +1987,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
             {from: player1}
         );
 
-        truffleAssert.eventEmitted(atomicMatchTx, "OrdersMatched",(ev) => {
+        truffleAssert.eventEmitted(takeOrderTx, "OrdersMatched",(ev) => {
             return ev.price.toString() === currentPrice.toString();
         });
 

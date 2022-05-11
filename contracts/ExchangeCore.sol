@@ -26,10 +26,10 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     // In order to protect against orders that are replayable across forked chains,
     // either the solidity version needs to be bumped up or it needs to be retrieved
     // from another contract.
-    uint256 private constant _CHAIN_ID = 56;
+    uint256 private constant _CHAIN_ID = 1;
 
     // Note: the domain separator is derived and verified in the constructor. */
-    bytes32 public constant DOMAIN_SEPARATOR = 0xf3d2ac68c052856a4466531fc8d3592e2a6dfa240a8bb1e088b036e6a98baffe;
+    bytes32 public constant DOMAIN_SEPARATOR = 0x1e4eb4419df82bcf8025cdf75573e470269ee47d3876be5dbfddd9f9d505dd62;
 
     uint256 public constant MAXIMUM_EXCHANGE_RATE = 500; //5%
 
@@ -123,7 +123,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     event OrderApprovedPartOne    (bytes32 indexed hash, address exchange, address indexed maker, address taker, address indexed makerRelayerFeeRecipient, SaleKindInterface.Side side, SaleKindInterface.SaleKind saleKind, address nftAddress, uint256 tokenId, bytes32 ipfsHash);
     event OrderApprovedPartTwo    (bytes32 indexed hash, bytes calldata, bytes replacementPattern, address staticTarget, bytes staticExtradata, address paymentToken, uint basePrice, uint extra, uint listingTime, uint expirationTime, uint salt);
     event OrderCancelled          (bytes32 indexed hash);
-    event OrdersMatched           (bytes32 buyHash, bytes32 sellHash, address indexed maker, address indexed taker, uint price, bytes32 indexed metadata);
+    event OrdersMatched           (bytes32 buyHash, bytes32 sellHash, address indexed maker, address indexed taker, address makerRelayerFeeRecipient, address takerRelayerFeeRecipient, uint price, bytes32 indexed metadata);
     event NonceIncremented        (address indexed maker, uint newNonce);
 
     constructor () public {
@@ -709,7 +709,13 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
         }
 
         /* Log match event. */
-        emit OrdersMatched(buyHash, sellHash, sell.makerRelayerFeeRecipient != address(0) ? sell.maker : buy.maker, sell.makerRelayerFeeRecipient != address(0) ? buy.maker : sell.maker, price, metadata);
+        emit OrdersMatched(
+            buyHash, sellHash,
+            sell.makerRelayerFeeRecipient != address(0) ? sell.maker : buy.maker,
+            sell.makerRelayerFeeRecipient != address(0) ? buy.maker : sell.maker,
+            sell.makerRelayerFeeRecipient != address(0) ? sell.makerRelayerFeeRecipient : buy.makerRelayerFeeRecipient,
+            sell.makerRelayerFeeRecipient != address(0) ? buy.takerRelayerFeeRecipient : sell.takerRelayerFeeRecipient,
+            price, metadata);
     }
 
     function _requireValidOrderWithNonce(Order memory order) internal view returns (bytes32) {
