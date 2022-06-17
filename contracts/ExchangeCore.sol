@@ -8,6 +8,7 @@ import "./ReentrancyGuarded.sol";
 import "./Ownable.sol";
 import "./Governable.sol";
 import "./SaleKindInterface.sol";
+import "./IFeeCalculator.sol";
 
 contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     string public constant name = "NiftyConnect Exchange Contract";
@@ -29,9 +30,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     uint256 private constant _CHAIN_ID = 1;
 
     // Note: the domain separator is derived and verified in the constructor. */
-    bytes32 public constant DOMAIN_SEPARATOR = 0x1e4eb4419df82bcf8025cdf75573e470269ee47d3876be5dbfddd9f9d505dd62;
-
-    uint256 public constant MAXIMUM_EXCHANGE_RATE = 500; //5%
+    bytes32 public constant DOMAIN_SEPARATOR = 0xf4d45b7f2f3705e293d2206e1de4a206d8f6bacd43c46be26315a30470704709;
 
     /* Token transfer proxy. */
     TokenTransferProxy public tokenTransferProxy;
@@ -48,10 +47,6 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     // If a signature was signed with a nonce that's different from the one stored in nonces, it
     // will fail validation.
     mapping(address => uint256) public nonces;
-
-    /* Required protocol taker fee, in basis points. Paid to takerRelayerFeeRecipient, makerRelayerFeeRecipient and protocol owner */
-    /* Initial rate 2% */
-    uint public exchangeFeeRate = 200;
 
     /* Share of exchangeFee which will be paid to takerRelayerFeeRecipient, in basis points. */
     /* Initial share 15% */
@@ -76,6 +71,8 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
 
     /*  */
     address public royaltyRegisterHub;
+
+    address public feeRateCalculator;
 
     /* An order on the exchange. */
     struct Order {
@@ -181,18 +178,6 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
     function incrementNonce() external {
         uint newNonce = ++nonces[msg.sender];
         emit NonceIncremented(msg.sender, newNonce);
-    }
-
-    /**
-     * @dev Change the exchange fee rate
-     * @param newExchangeFeeRate New fee to set in basis points
-     */
-    function changeExchangeFeeRate(uint newExchangeFeeRate)
-    public
-    onlyGovernor
-    {
-        require(newExchangeFeeRate<=MAXIMUM_EXCHANGE_RATE, "invalid exchange fee rate");
-        exchangeFeeRate = newExchangeFeeRate;
     }
 
     /**
@@ -526,7 +511,7 @@ contract ExchangeCore is ReentrancyGuarded, Ownable, Governable {
         /* Amount that must be sent by buyer (for Ether). */
         uint requiredAmount = price;
 
-        uint exchangeFee = SafeMath.div(SafeMath.mul(exchangeFeeRate, price), INVERSE_BASIS_POINT);
+        uint exchangeFee = SafeMath.div(SafeMath.mul(IFeeCalculator(feeRateCalculator).calculateFee(sell.maker), price), INVERSE_BASIS_POINT);
 
         address royaltyReceiver = address(0x00);
         uint256 royaltyAmount;

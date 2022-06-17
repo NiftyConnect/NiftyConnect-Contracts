@@ -12,6 +12,7 @@ const NiftyConnectTokenTransferProxy = artifacts.require("NiftyConnectTokenTrans
 const TestERC721 = artifacts.require("TestERC721");
 const TestERC1155 = artifacts.require("TestERC1155");
 const TestERC20 = artifacts.require("TestERC20");
+const TestFeeCalculator = artifacts.require("TestFeeCalculator");
 const MerkleValidator = artifacts.require("MerkleValidator");
 const RoyaltyRegisterHub = artifacts.require("RoyaltyRegisterHub");
 
@@ -318,10 +319,11 @@ function generateSellReplacementPatternForTraitBasedOrder(totalLeaf, isERC1155) 
 contract('NiftyConnect Exchange Contract v2', (accounts) => {
     it('Test Query Initial Status', async () => {
         const niftyConnectExchangeInst = await NiftyConnectExchange.deployed();
+        const testFeeCalculatorInst = await TestFeeCalculator.deployed()
         const testERC721Inst = await TestERC721.deployed();
         const testERC1155Inst = await TestERC1155.deployed();
 
-        const exchangeFeeRate = await niftyConnectExchangeInst.exchangeFeeRate();
+        const exchangeFeeRate = await testFeeCalculatorInst.exchangeFeeRate();
         assert.equal(exchangeFeeRate.toString(), "200", "wrong exchangeFeeRate");
 
         const takerRelayerFeeShare = await niftyConnectExchangeInst.takerRelayerFeeShare();
@@ -375,6 +377,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const player1RelayerFeeRecipient = accounts[4];
 
         const niftyConnectExchangeInst = await NiftyConnectExchange.deployed();
+        const testFeeCalculatorInst = await TestFeeCalculator.deployed()
         const testERC721Inst = await TestERC721.deployed();
 
         const tokenIdIdx = await testERC721Inst.tokenIdIdx();
@@ -791,6 +794,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const player1RelayerFeeRecipient = accounts[4];
 
         const niftyConnectExchangeInst = await NiftyConnectExchange.deployed();
+        const testFeeCalculatorInst = await TestFeeCalculator.deployed();
         const testERC721Inst = await TestERC721.deployed();
         const testERC20Inst = await TestERC20.deployed();
 
@@ -870,7 +874,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         await niftyConnectExchangeInst.setPendingGovernor(tempExchangeGovernor, {from: exchangeGovernor});
         await niftyConnectExchangeInst.acceptGovernance({from: tempExchangeGovernor});
 
-        await niftyConnectExchangeInst.changeExchangeFeeRate(web3.utils.toBN(150), {from: tempExchangeGovernor});
+        await testFeeCalculatorInst.changeExchangeFeeRate(web3.utils.toBN(150), {from: tempExchangeGovernor});
 
         try {
             await niftyConnectExchangeInst.changeTakerRelayerFeeShare(
@@ -893,7 +897,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         const INVERSE_BASIS_POINT = await niftyConnectExchangeInst.INVERSE_BASIS_POINT();
 
-        const exchangeFeeRate = await niftyConnectExchangeInst.exchangeFeeRate();
+        const exchangeFeeRate = await testFeeCalculatorInst.exchangeFeeRate();
         const takerRelayerFeeShare = await niftyConnectExchangeInst.takerRelayerFeeShare();
         const makerRelayerFeeShare = await niftyConnectExchangeInst.makerRelayerFeeShare();
         const protocolFeeShare = await niftyConnectExchangeInst.protocolFeeShare();
@@ -1264,6 +1268,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const player1RelayerFeeRecipient = accounts[4];
 
         const niftyConnectExchangeInst = await NiftyConnectExchange.deployed();
+        const testFeeCalculatorInst = await TestFeeCalculator.deployed()
         const testERC1155Inst = await TestERC1155.deployed();
         const testERC20Inst = await TestERC20.deployed();
 
@@ -1342,7 +1347,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
 
         const INVERSE_BASIS_POINT = await niftyConnectExchangeInst.INVERSE_BASIS_POINT();
 
-        const exchangeFeeRate = await niftyConnectExchangeInst.exchangeFeeRate();
+        const exchangeFeeRate = await testFeeCalculatorInst.exchangeFeeRate();
         const takerRelayerFeeShare = await niftyConnectExchangeInst.takerRelayerFeeShare();
         const makerRelayerFeeShare = await niftyConnectExchangeInst.makerRelayerFeeShare();
         const protocolFeeShare = await niftyConnectExchangeInst.protocolFeeShare();
@@ -1454,6 +1459,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const player1RelayerFeeRecipient = accounts[4];
 
         const niftyConnectExchangeInst = await NiftyConnectExchange.deployed();
+        const testFeeCalculatorInst = await TestFeeCalculator.deployed()
         const testERC721Inst = await TestERC721.deployed();
         const testERC20Inst = await TestERC20.deployed();
 
@@ -1522,7 +1528,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const sellReplacementPattern = generateSellReplacementPatternForNormalOrder(false)
 
         const INVERSE_BASIS_POINT = await niftyConnectExchangeInst.INVERSE_BASIS_POINT();
-        const exchangeFeeRate = await niftyConnectExchangeInst.exchangeFeeRate();
+        const exchangeFeeRate = await testFeeCalculatorInst.exchangeFeeRate();
         const takerRelayerFeeShare = await niftyConnectExchangeInst.takerRelayerFeeShare();
         const makerRelayerFeeShare = await niftyConnectExchangeInst.makerRelayerFeeShare();
         const protocolFeeShare = await niftyConnectExchangeInst.protocolFeeShare();
@@ -1633,6 +1639,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const player1RelayerFeeRecipient = accounts[4];
 
         const niftyConnectExchangeInst = await NiftyConnectExchange.deployed();
+        const testFeeCalculatorInst = await TestFeeCalculator.deployed();
         const testERC1155Inst = await TestERC1155.deployed();
         const testERC20Inst = await TestERC20.deployed();
 
@@ -1702,7 +1709,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const sellReplacementPattern = generateSellReplacementPatternForNormalOrder(true)
 
         const INVERSE_BASIS_POINT = await niftyConnectExchangeInst.INVERSE_BASIS_POINT();
-        const exchangeFeeRate = await niftyConnectExchangeInst.exchangeFeeRate();
+        const exchangeFeeRate = await testFeeCalculatorInst.exchangeFeeRate();
         const takerRelayerFeeShare = await niftyConnectExchangeInst.takerRelayerFeeShare();
         const makerRelayerFeeShare = await niftyConnectExchangeInst.makerRelayerFeeShare();
         const protocolFeeShare = await niftyConnectExchangeInst.protocolFeeShare();
@@ -1813,6 +1820,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const player1RelayerFeeRecipient = accounts[4];
 
         const niftyConnectExchangeInst = await NiftyConnectExchange.deployed();
+        const testFeeCalculatorInst = await TestFeeCalculator.deployed();
         const testERC721Inst = await TestERC721.deployed();
         const testERC20Inst = await TestERC20.deployed();
 
@@ -1885,7 +1893,7 @@ contract('NiftyConnect Exchange Contract v2', (accounts) => {
         const buyReplacementPattern = generateBuyReplacementPatternForNormalOrder(false)
 
         const INVERSE_BASIS_POINT = await niftyConnectExchangeInst.INVERSE_BASIS_POINT();
-        const exchangeFeeRate = await niftyConnectExchangeInst.exchangeFeeRate();
+        const exchangeFeeRate = await testFeeCalculatorInst.exchangeFeeRate();
         const takerRelayerFeeShare = await niftyConnectExchangeInst.takerRelayerFeeShare();
         const makerRelayerFeeShare = await niftyConnectExchangeInst.makerRelayerFeeShare();
         const protocolFeeShare = await niftyConnectExchangeInst.protocolFeeShare();

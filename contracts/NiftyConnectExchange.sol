@@ -1,10 +1,14 @@
 pragma solidity 0.4.26;
+pragma experimental ABIEncoderV2;
 
 import "./ExchangeCore.sol";
 import "./SaleKindInterface.sol";
 import "./TokenTransferProxy.sol";
 
 contract NiftyConnectExchange is ExchangeCore {
+
+    bytes4 private constant MAKE_ORDER_SELECTOR = 0x97cea71b; // bytes4(keccak256("makeOrder_(address[10],uint256[9],uint8,uint8,bytes,bytes,bytes32[2])"));
+    bytes4 private constant TAKE_ORDER_SELECTOR = 0x7da26f55; // bytes4(keccak256("takeOrder_(address[16],uint256[12],uint8[4],bytes,bytes,bytes,bytes,bytes,bytes,bytes32)"));
 
     enum MerkleValidatorSelector {
         MatchERC721UsingCriteria,
@@ -16,12 +20,14 @@ contract NiftyConnectExchange is ExchangeCore {
         TokenTransferProxy tokenTransferProxyAddress,
         address protocolFeeAddress,
         address merkleValidatorAddress,
-        address royaltyRegisterHubAddress)
+        address royaltyRegisterHubAddress,
+        address feeRateCalculatorAddress)
     public {
         tokenTransferProxy = tokenTransferProxyAddress;
         protocolFeeRecipient = protocolFeeAddress;
         merkleValidatorContract = merkleValidatorAddress;
         royaltyRegisterHub = royaltyRegisterHubAddress;
+        feeRateCalculator = feeRateCalculatorAddress;
     }
 
     function buildCallData(

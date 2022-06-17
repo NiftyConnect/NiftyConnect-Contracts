@@ -6,6 +6,7 @@ const RoyaltyRegisterHub = artifacts.require("RoyaltyRegisterHub");
 const TestERC721 = artifacts.require("TestERC721");
 const TestERC1155 = artifacts.require("TestERC1155");
 const TestERC20 = artifacts.require("TestERC20");
+const TestFeeCalculator = artifacts.require("TestFeeCalculator");
 
 module.exports = function (deployer, network, accounts) {
   const protocolFeeAddress = accounts[0];
@@ -14,12 +15,14 @@ module.exports = function (deployer, network, accounts) {
 
     await deployer.deploy(MerkleValidator);
     await deployer.deploy(RoyaltyRegisterHub);
+    await deployer.deploy(TestFeeCalculator);
 
     await deployer.deploy(NiftyConnectExchange,
         NiftyConnectTokenTransferProxy.address,
         protocolFeeAddress,
         MerkleValidator.address,
-        RoyaltyRegisterHub.address);
+        RoyaltyRegisterHub.address,
+        TestFeeCalculator.address);
 
     const NiftyConnectTokenTransferProxyInst = await NiftyConnectTokenTransferProxy.deployed();
     await NiftyConnectTokenTransferProxyInst.initialize(NiftyConnectExchange.address, {from: accounts[0]});
